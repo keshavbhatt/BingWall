@@ -49,6 +49,10 @@ plugs:
     default-provider: qt551
 
 parts:
+   gsettings:
+     plugin: nil
+     stage-packages:
+            - libglib2.0-bin
    application:
      source-type: git
      source: https://github.com/keshavbhatt/BingWall.git
