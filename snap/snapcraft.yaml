@@ -2,7 +2,7 @@ name: bing-wall
 version: '1.0'
 summary: Bing Wallpaper of the day to Gnome Desktop
 description: |
-  Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks.
+  Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
 grade: stable
 confinement: strict
 icon: snap/gui/icon.png
