@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // wall_view is the child of monitor
     _wall_view = new QLabel(ui->monitor);
     _wall_view->setAlignment(Qt::AlignCenter);
-    _wall_view->setPixmap(QPixmap("/tmp/180.jpg"));
+    _wall_view->setPixmap(QPixmap(":/resources/180.jpg"));
     _wall_view->setGeometry(12,26,319,180);
     _wall_view->show();
     _wall_view->installEventFilter(this);
