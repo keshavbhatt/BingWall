@@ -132,6 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
         btn->setStyleSheet(btn_style_3);
     }
 
+    ui->wonderwall->installEventFilter(this);
     updateNavigationButtons();
     refreshLoader();
     load_wallpapers();
@@ -183,6 +184,21 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                     break;
                 }
 
+    }
+
+    if(obj == ui->wonderwall){
+         const QHoverEvent* const he = static_cast<const QHoverEvent*>( event );
+         switch(he->type())
+             {
+             case QEvent::HoverEnter:
+                 ui->wonderwall->setIcon(QIcon(":/resources/wonderwall2.png"));
+                 break;
+             case QEvent::HoverLeave:
+                 ui->wonderwall->setIcon(QIcon(":/resources/wonderwall.png"));
+                 break;
+             default:
+                 break;
+             }
     }
     if(obj->objectName().contains("downloaded_wall-")){
          const QHoverEvent* const he = static_cast<const QHoverEvent*>( event );
@@ -528,4 +544,9 @@ void MainWindow::load_downloaded_wallpapers(){
         _ui_downloaded.gridLayout->itemAtPosition(row,col)->widget()->installEventFilter(this);
     }
     downloded_loaded = true;
+}
+
+void MainWindow::on_wonderwall_clicked()
+{
+    QDesktopServices::openUrl(QUrl("https://snapcraft.io/wonderwall"));
 }

@@ -57,6 +57,8 @@ private slots:
     void show_option_for_downloaded(QObject *obj);
     void hide_option_for_downloaded(QObject *obj);
     void delete_wallpaper(QString filePath);
+    void on_wonderwall_clicked();
+
 private:
     Ui::MainWindow *ui;
     Ui::thumbWidget _ui_listitem;

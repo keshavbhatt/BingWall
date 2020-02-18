@@ -169,6 +169,36 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
          </widget>
         </item>
         <item>
+         <widget class="controlButton" name="wonderwall">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For full featured Desktop Wallpaper application&lt;/p&gt;&lt;p&gt;Try Wonderwall Application, Click to learn more:  &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;'snap install wonderwall'&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border:none;
+</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="images.qrc">
+            <normaloff>:/resources/wonderwall.png</normaloff>:/resources/wonderwall.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>34</width>
+            <height>34</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
