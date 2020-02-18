@@ -80,3 +80,4 @@ INSTALLS += target icon desktop
 RESOURCES += \
     darkstyle.qrc \
     images.qrc
+
