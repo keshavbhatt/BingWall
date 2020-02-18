@@ -283,6 +283,7 @@ void MainWindow::init_request()
             file.write(reply.readAll());
             apply_wallpaper(file.fileName());
             file.close();
+            load_downloaded_wallpapers();
         }
         reply.deleteLater();
         reply.manager()->deleteLater();
