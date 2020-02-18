@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+GenericName=BingWall
+Name=BingWall
+Type=Application
+Icon=bingwall
+Keywords=bing;wallpaper;of day
+Exec=bingwall %F
+Categories=Utility;Qt;
+Terminal=false
+Name[en_US]=BingWall

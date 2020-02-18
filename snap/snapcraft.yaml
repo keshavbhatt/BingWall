@@ -1,0 +1,79 @@
+name: bing-wall
+version: '1.0'
+summary: Bing Wallpaper of the day to your Gnome Desktop
+description: |
+  Little powerful utility brings Bing's Wallpaper of the day
+to your desktop with ease of few clicks.
+grade: stable
+confinement: strict
+icon: snap/gui/icon.png
+base: core18
+
+architectures:
+  - build-on: amd64
+    run-on: amd64
+
+apps:
+  bing-wall:
+    command: desktop-launch bing-wall
+    environment:
+       DISABLE_WAYLAND: 1
+    desktop: usr/share/applications/bingwall.desktop
+    plugs:
+        - home
+        - unity7
+        - network
+        - opengl
+        - x11
+        - desktop
+        - network-manager
+        - gsettings
+        - desktop-legacy
+
+plugs:
+  gsettings:
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+  qt551:
+    interface: content
+    target: $SNAP/qt551
+    default-provider: qt551
+
+parts:
+   application:
+     source-type: git
+     source: https://github.com/keshavbhatt/BingWall.git
+     plugin: qmake
+     qt-version: qt5
+     override-build: |
+            snapcraftctl build
+            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${SNAPCRAFT_PART_SRC}/bingwall.desktop
+            cp -rf ${SNAPCRAFT_PART_SRC}/bingwall.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
+     after: [desktop-qt5]
+
+   snap-launcher:
+     plugin: dump
+     source: snap_launcher/
+   desktop-qt5:
+     plugin: nil
+     build-packages:
+       - build-essential
+       - qtbase5-dev
+       - dpkg-dev
+   cleanup:
+       after: [application]
+       plugin: nil
+       override-prime: |
+          # Remove unneeded stage files to save space
+          cd usr/share
+          rm -rf apport bash-completion bug doc doc-base icons lintian man pam-configs pkgconfig themes upstart zsh

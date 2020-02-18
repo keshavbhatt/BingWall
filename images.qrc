@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/monitor.png</file>
+        <file>resources/binfwall_128.png</file>
+        <file>resources/arrow-left-circle-line.png</file>
+        <file>resources/arrow-right-circle-line.png</file>
+        <file>resources/refresh-line.png</file>
+        <file>resources/texture.png</file>
+        <file>resources/disabled-arrow-left-circle-line.png</file>
+        <file>resources/disabled-arrow-right-circle-line.png</file>
+        <file>resources/download-line.png</file>
+        <file>resources/image-2-line.png</file>
+        <file>resources/setting-line.png</file>
+        <file>resources/map-pin-line.png</file>
+        <file>resources/binfwall_64.png</file>
+        <file>resources/folder-open-line.png</file>
+        <file>resources/links-line.png</file>
+        <file>resources/paypal-line.png</file>
+        <file>resources/star-line.png</file>
+        <file>resources/folder-download-line.png</file>
+    </qresource>
+</RCC>
