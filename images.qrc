@@ -18,5 +18,6 @@
         <file>resources/paypal-line.png</file>
         <file>resources/star-line.png</file>
         <file>resources/folder-download-line.png</file>
+        <file>resources/180.jpg</file>
     </qresource>
 </RCC>
