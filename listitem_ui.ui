@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>151</height>
+    <width>178</width>
+    <height>147</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,16 +57,10 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
        <number>1</number>
       </property>
       <item>
-       <widget class="QLabel" name="thumbnail">
+       <widget class="RemotePixmapLabel" name="thumbnail">
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
+          <width>178</width>
           <height>100</height>
          </size>
         </property>
@@ -89,6 +83,13 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RemotePixmapLabel</class>
+   <extends>QLabel</extends>
+   <header>remotepixmaplabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
