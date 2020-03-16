@@ -37,6 +37,7 @@ SOURCES += \
         darkstyle.cpp \
         main.cpp \
         mainwindow.cpp \
+        remotepixmaplabel.cpp \
         request.cpp \
         scrolltext.cpp \
         waitingspinnerwidget.cpp
@@ -46,6 +47,7 @@ HEADERS += \
         darkstyle.h \
         gridlayoututil.h \
         mainwindow.h \
+        remotepixmaplabel.h \
         request.h \
         scrolltext.h \
         waitingspinnerwidget.h
