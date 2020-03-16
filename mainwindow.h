@@ -29,6 +29,12 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void setWallpaperOfTheDay();
+signals:
+    void wallpaperSet();
+    void wallpaperListLoaded(bool containsWallpapers);
+
 protected slots:
     bool eventFilter(QObject *obj, QEvent *event);
 private slots:
@@ -59,6 +65,10 @@ private slots:
     void delete_wallpaper(QString filePath);
     void on_wonderwall_clicked();
 
+    void check_for_startup();
+    void launch_on_startup_toggled(bool arg1);
+    void donot_run_onStartupp();
+    void run_onstartup();
 private:
     Ui::MainWindow *ui;
     Ui::thumbWidget _ui_listitem;

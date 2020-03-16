@@ -97,6 +97,9 @@ MainWindow::MainWindow(QWidget *parent) :
        QDesktopServices::openUrl(QUrl(returnPath("downloaded")));
     });
 
+    check_for_startup();
+    connect(_ui_settings.startUp,SIGNAL(toggled(bool)),this,SLOT(launch_on_startup_toggled(bool)));
+
     _locations << "au"<<"ca"<<"cn"<<"de"<<"fr"<<"in"<<"jp"<<"es"<<"gb"<<"us";
 
     connect(_ui_settings.locationCombo,SIGNAL(currentIndexChanged(QString)),this,SLOT(location_changed(QString)));
@@ -136,6 +139,9 @@ MainWindow::MainWindow(QWidget *parent) :
     updateNavigationButtons();
     refreshLoader();
     load_wallpapers();
+
+    ui->wallpaperList->setDragEnabled(false);
+    ui->wallpaperList->setDragDropMode(QAbstractItemView::NoDragDrop);
 }
 
 void MainWindow::location_changed(QString newLocation){
@@ -358,6 +364,7 @@ void MainWindow::apply_wallpaper(QString filePath)
     }
     else{
           qDebug()<<"GSETTINGS:Process success:";
+          emit wallpaperSet();
     }
 }
 
@@ -413,17 +420,32 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
             _ui_listitem.fullUrl->setText(fullUrl);
             _ui_listitem.fullUrl->hide();
 
+            listwidget->adjustSize();
+
             listwidget->setToolTip("<b>"+title+"</b><br>"
                                                +copyright+"<br>"
                                                +date);
-            _ui_listitem.thumbnail->resize(178,100);
-            LoadCover(QUrl(thumbUrl),*_ui_listitem.thumbnail);
-
-            listwidget->adjustSize();
 
             QListWidgetItem* item;
             item = new QListWidgetItem(ui->wallpaperList);
+
             item->setSizeHint(listwidget->minimumSizeHint());
+
+            QString cache_path =  QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+            QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
+            diskCache->setCacheDirectory(cache_path);
+
+
+            _ui_listitem.thumbnail->setScaledContents(true);
+            double ratio  = 178.0/100.0;
+            double height = listwidget->height();
+            double width  = ratio * height;
+
+            _ui_listitem.thumbnail->setPixmap(QPixmap(":/resources/180.jpg").scaled(QSize(width,height),Qt::KeepAspectRatio,Qt::SmoothTransformation));
+            _ui_listitem.thumbnail->setFixedSize(width,height);
+            _ui_listitem.thumbnail->setRemotePixmap(thumbUrl,diskCache);
+
+
             ui->wallpaperList->setItemWidget(item, listwidget);
 
             QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
@@ -443,6 +465,8 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
             updateNavigationButtons();
         }
     }
+    bool containsWallpapers = data.count() > 0;
+    emit wallpaperListLoaded(containsWallpapers);
 }
 
 MainWindow::~MainWindow()
@@ -550,3 +574,81 @@ void MainWindow::on_wonderwall_clicked()
 {
     QDesktopServices::openUrl(QUrl("https://snapcraft.io/wonderwall"));
 }
+
+void MainWindow::setWallpaperOfTheDay(){
+    connect(this,&MainWindow::wallpaperSet,[=](){
+        if(this->close()==false){
+            qApp->quit();
+        }
+    });
+    connect(this,&MainWindow::wallpaperListLoaded,[=](bool containsWallpapers){
+        if(containsWallpapers){
+            ui->wallpaperList->setCurrentRow(0);
+            _ui_action.set->click();
+        }
+    });
+}
+
+
+//run app at startup
+void MainWindow::run_onstartup(){
+        QString launcher = QApplication::applicationFilePath();
+        QString launcher_name = QApplication::applicationName();
+        QString data ="[Desktop Entry]\n"
+            "Type=Application\n"
+            "Exec="+launcher+" --set\n"
+            "Hidden=false\n"
+            "NoDisplay=false\n"
+            "Name[en_IN]="+launcher_name+"\n"
+            "Name="+launcher_name+"\n"
+            "X-GNOME-Autostart-enabled=true";
+    QString autostartpath = QDir::homePath()+"/.config/autostart";
+
+    QDir dir(autostartpath);
+    if (!dir.exists())
+        dir.mkpath(autostartpath);
+    //check if file exist !!
+    QFileInfo file(autostartpath+"/"+launcher_name+".desktop");
+    if(file.exists()){
+        //remove file and copy file
+        QFile desktop_file(autostartpath+"/"+launcher_name+".desktop");
+        desktop_file.remove();
+
+        //edit file and add X-GNOME-Autostart-enabled=true
+        QFile autostartfile(autostartpath+"/"+launcher_name+".desktop");
+        if (autostartfile.open(QIODevice::Append)) {
+        QTextStream stream(&autostartfile);
+        stream <<data<<endl;}
+    }
+    //if not exists or for other conditions
+    else{
+        //edit file and add X-GNOME-Autostart-enabled=true
+        QFile autostartfile(autostartpath+"/"+launcher_name+".desktop");
+        if (autostartfile.open(QIODevice::Append)) {
+        QTextStream stream(&autostartfile);
+        stream <<data<<endl;}
+    }
+}
+//do not run app at startup
+void MainWindow::donot_run_onStartupp(){
+    QString launcher_name = QApplication::applicationName();
+    QString autostartpath = QDir::homePath()+"/.config/autostart";
+    QFile(autostartpath+"/"+launcher_name+".desktop").remove();
+}
+//slot for startup toggled
+void MainWindow::launch_on_startup_toggled(bool arg1){
+    if(arg1){
+        run_onstartup();
+    }else{
+        donot_run_onStartupp();
+    }
+}
+//check if startup file is there .config/autostart
+void MainWindow::check_for_startup(){
+    QString launcher_name = QApplication::applicationName();
+    QString autostartpath = QDir::homePath()+"/.config/autostart";
+    QFile autostartfile(autostartpath+"/"+launcher_name+".desktop");
+    _ui_settings.startUp->setChecked(QFileInfo(autostartfile).exists());
+}
+
+
