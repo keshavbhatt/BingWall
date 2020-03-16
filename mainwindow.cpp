@@ -585,6 +585,11 @@ void MainWindow::setWallpaperOfTheDay(){
         if(containsWallpapers){
             ui->wallpaperList->setCurrentRow(0);
             _ui_action.set->click();
+        }else{
+            //TODO retry 10 time
+            if(this->close()==false){
+                qApp->quit();
+            }
         }
     });
 }
