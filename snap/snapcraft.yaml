@@ -15,6 +15,7 @@ architectures:
 apps:
   bing-wall:
     command: desktop-launch bing-wall
+    autostart: BingWall.desktop
     environment:
        DISABLE_WAYLAND: 1
     desktop: usr/share/applications/bingwall.desktop
