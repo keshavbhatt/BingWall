@@ -17,7 +17,11 @@ DEFINES += VERSIONSTR=\\\"$${VERSION}\\\"
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
-
+CONFIG(release, debug|release): {
+    DESTDIR="$$PWD/build/release"
+} else {
+    DESTDIR="$$PWD/build/debug"
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

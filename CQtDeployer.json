@@ -1,0 +1,12 @@
+{
+    "bin": "./build/release",
+    "clear": true,
+    "libDir": "./",
+    "recursiveDepth": "5",
+    "qif": true,
+    "name": "BingWall",
+    "icon": "./resources/wonderwall2Installer.png",
+    "qifStyle": "./darkstyle/darkstyleInstaller.qss",
+    "qifLogo": "./resources/wonderwall2Installer.png"
+
+}
