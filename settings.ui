@@ -30,6 +30,13 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QCheckBox" name="watermark">
+        <property name="text">
+         <string>Show image detail on wallpaper</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="startUp">
         <property name="text">
          <string>Set wallpaper of the day on Syatem StartUp</string>

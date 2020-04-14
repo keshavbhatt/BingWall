@@ -10,6 +10,9 @@
 #include "gridlayoututil.h"
 #include <QScreen>
 #include <QDesktopWidget>
+#include <QPainter>
+#include <QImage>
+#include <QTextBrowser>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,7 +40,16 @@ MainWindow::MainWindow(QWidget *parent) :
     actionWidget->setObjectName("actions_view");
     _ui_action.setupUi(actionWidget);
     _ui_action.progressBar->hide();
-    connect(_ui_action.set,SIGNAL(clicked()),this,SLOT(setWallpaper()));
+//    connect(_ui_action.set,SIGNAL(clicked()),this,SLOT(setWallpaper()));
+    connect(_ui_action.set,&QPushButton::clicked,[=](){
+        //update currentWallInfo before setting wallpaper
+        QWidget *listwidget = ui->wallpaperList->itemWidget(ui->wallpaperList->item(ui->wallpaperList->currentRow()));
+        if(listwidget!=nullptr)
+        {
+           currentWallInfo = listwidget->toolTip();
+        }
+        setWallpaper();
+    });
     actionWidget->setGeometry(_wall_view->rect());
     actionWidget->hide();
 
@@ -98,7 +110,13 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     check_for_startup();
+
     connect(_ui_settings.startUp,SIGNAL(toggled(bool)),this,SLOT(launch_on_startup_toggled(bool)));
+
+    _ui_settings.watermark->setChecked(settings.value("watermark",false).toBool());
+    connect(_ui_settings.watermark,&QCheckBox::toggled,[=](bool checked){
+        settings.setValue("watermark",checked);
+    });
 
     _locations << "au"<<"ca"<<"cn"<<"de"<<"fr"<<"in"<<"jp"<<"es"<<"gb"<<"us";
 
@@ -233,7 +251,23 @@ void MainWindow::show_option_for_downloaded(QObject *obj){
         option->setObjectName("option_"+obj->objectName());
         _ui_downloaded_option.setupUi(option);
         connect(_ui_downloaded_option.set_button,&QPushButton::clicked,[=](){
-            apply_wallpaper(returnPath("downloaded")+obj->objectName().split("downloaded_wall-").last());
+            QString fileName = returnPath("downloaded")+obj->objectName().split("downloaded_wall-").last();
+            QString fileNameWaterMarked = returnPath("downloaded_water_marked")+obj->objectName().split("downloaded_wall-").last();
+
+            QFileInfo f(fileName);
+            qDebug()<<f.fileName();
+            QFile detail(returnPath("details")+f.baseName());
+            if (detail.open(QFile::ReadOnly))
+            currentWallInfo = detail.readAll();
+            detail.close();
+
+            if(settings.value("watermark",false).toBool()==true){
+                if(saveWall(fileNameWaterMarked,fileName)){
+                    apply_wallpaper(fileNameWaterMarked);
+                }
+            }else{
+                apply_wallpaper(fileName);
+            }
         });
         connect(_ui_downloaded_option.delete_button,&QPushButton::clicked,[=](){
             delete_wallpaper(returnPath("downloaded")+obj->objectName().split("downloaded_wall-").last());
@@ -303,8 +337,25 @@ void MainWindow::init_request()
             QFile file(returnPath("downloaded")+fileName);
             if (file.open(QFile::ReadWrite))
             file.write(reply.readAll());
-            apply_wallpaper(file.fileName());
             file.close();
+
+            if(currentWallInfo.trimmed().isEmpty()){
+                currentWallInfo = "BingWall";
+            }
+
+            QFileInfo f(file);
+            QFile detail(returnPath("details")+f.baseName());
+            if (detail.open(QFile::ReadWrite))
+            detail.write(currentWallInfo.toUtf8());
+            detail.close();
+
+            if(settings.value("watermark",false).toBool()==true){
+                if(saveWall(returnPath("downloaded_water_marked")+fileName,file.fileName())){
+                    apply_wallpaper(returnPath("downloaded_water_marked")+fileName);
+                }
+            }else{
+                apply_wallpaper(file.fileName());
+            }
             load_downloaded_wallpapers();
         }
         reply.deleteLater();
@@ -329,6 +380,46 @@ void MainWindow::init_request()
     });
 }
 
+bool MainWindow::saveWall(const QString &path,QString imagePath){
+
+    if(imagePath.split("/").last().contains(".")== false)
+    {
+        imagePath = imagePath+".jpg";
+        if(QFileInfo(imagePath).exists() == false)
+             imagePath = imagePath+".png";
+    }
+
+    qDebug()<<"path"<<imagePath<<path;
+
+  QImage image(imagePath);
+  QPainter p;
+  if (!p.begin(&image)) return false;
+
+  p.setPen(QPen(QColor(255, 255, 255, 0)));
+  QFont font = p.font();
+  font.setPixelSize(22);
+  font.setBold(true);
+  p.setFont(font);
+  if(currentWallInfo.trimmed().isEmpty()){
+      currentWallInfo = "BingWall";
+  }
+  QRect boundingRect;
+  //draw fake text to calc bound rect
+  p.drawText(QRect(image.rect().x()-20,image.rect().y()-20,image.rect().width(),image.rect().height()), Qt::AlignBottom | Qt::AlignRight |
+             Qt::TextWordWrap , htmlToPlainText(currentWallInfo),&boundingRect);
+
+  p.fillRect(QRectF(boundingRect.x()-5,boundingRect.y()-5,boundingRect.width()+10,boundingRect.height()+10), QBrush(QColor(0, 0, 0, 125)));
+  p.setPen(QPen(QColor(255, 255, 255, 125)));
+  p.drawText(image.rect().x()-20,image.rect().y()-20,image.rect().width(),image.rect().height(), Qt::AlignBottom | Qt::AlignRight |
+             Qt::TextWordWrap , htmlToPlainText(currentWallInfo),&boundingRect);
+  p.end();
+  if(path.split("/").last().contains(".")){
+      return image.save(path);
+  }else{
+      return image.save(path+"."+QFileInfo(imagePath).suffix());
+  }
+}
+
 void MainWindow::delete_wallpaper(QString filePath){
     //little hack to check if file was passed with exetension suffix.
     //if not try to guess the file name by apending possible suffixes
@@ -338,9 +429,19 @@ void MainWindow::delete_wallpaper(QString filePath){
         if(QFileInfo(filePath).exists() == false)
              filePath = filePath+".png";
     }
+
     QFile file(filePath);
+    QFileInfo f(file);
     file.remove();
     file.deleteLater();
+
+    QFile fileWaterMark(filePath.replace("/downloaded/","/downloaded_water_marked/"));
+    fileWaterMark.remove();
+    fileWaterMark.deleteLater();
+
+    QFile detail(returnPath("details")+f.baseName());
+    detail.remove();
+    detail.deleteLater();
 }
 
 void MainWindow::apply_wallpaper(QString filePath)
@@ -498,12 +599,14 @@ void MainWindow::on_wallpaperList_itemClicked(QListWidgetItem *item)
             QLineEdit *fullUrl = listwidget->findChild<QLineEdit*>("fullUrl");
             this->_currentUrl = fullUrl->text();
             QLineEdit *thumbUrl = listwidget->findChild<QLineEdit*>("thumbUrl");
+            currentWallInfo = listwidget->toolTip();
             LoadCover(QUrl(thumbUrl->text()),*_wall_view);
     }
     updateNavigationButtons();
 }
 
-void MainWindow::updateNavigationButtons(){
+void MainWindow::updateNavigationButtons()
+{
     int currentRow = ui->wallpaperList->currentRow();
     int totalItems = ui->wallpaperList->count();
     if(currentRow < totalItems-1){

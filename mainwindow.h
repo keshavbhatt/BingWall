@@ -70,6 +70,7 @@ private slots:
     void launch_on_startup_toggled(bool arg1);
     void donot_run_onStartupp();
     void run_onstartup();
+    bool saveWall(const QString &path, QString imagePath);
 private:
     Ui::MainWindow *ui;
     Ui::thumbWidget _ui_listitem;
@@ -93,6 +94,20 @@ private:
 
     int rows,cols;
     bool downloded_loaded = false;
+    QString currentWallInfo = "";
+
+    QString htmlToPlainText(QString str){
+        QString out;
+            QTextDocument text;
+            text.setHtml(str);
+            out = text.toPlainText();
+            text.deleteLater();
+        return out .replace("\\\"","'")
+                .replace("&amp;","&")
+                .replace("&gt;",">")
+                .replace("&lt;","<")
+                .replace("&#39;","'");
+    }
 
 
 
