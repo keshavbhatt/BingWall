@@ -398,6 +398,7 @@ void MainWindow::parse_json_reply(const QString reply)
     load_data_into_view(data);
 }
 
+
 void MainWindow::load_data_into_view(QList<QStringList> data){
     for (int i = 0; i < data.count(); i++)
     {
@@ -410,59 +411,74 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
             fullUrl     =   item_meta.at(2);
             thumbUrl    =   item_meta.at(3);
             date        =   item_meta.at(4);
-
             thumbUrl    =    thumbUrl.replace("_480","_200");
 
-            QWidget *listwidget = new QWidget(ui->wallpaperList);
-            _ui_listitem.setupUi(listwidget);
-            _ui_listitem.thumbUrl->setText(thumbUrl);
-            _ui_listitem.thumbUrl->hide();
-            _ui_listitem.fullUrl->setText(fullUrl);
-            _ui_listitem.fullUrl->hide();
-
-            listwidget->adjustSize();
-
-            listwidget->setToolTip("<b>"+title+"</b><br>"
-                                               +copyright+"<br>"
-                                               +date);
-
-            QListWidgetItem* item;
-            item = new QListWidgetItem(ui->wallpaperList);
-
-            item->setSizeHint(listwidget->minimumSizeHint());
-
-            QString cache_path =  QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-            QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
-            diskCache->setCacheDirectory(cache_path);
-
-
-            _ui_listitem.thumbnail->setScaledContents(true);
-            double ratio  = 178.0/100.0;
-            double height = listwidget->height();
-            double width  = ratio * height;
-
-            _ui_listitem.thumbnail->setPixmap(QPixmap(":/resources/180.jpg").scaled(QSize(width,height),Qt::KeepAspectRatio,Qt::SmoothTransformation));
-            _ui_listitem.thumbnail->setFixedSize(width,height);
-            _ui_listitem.thumbnail->setRemotePixmap(thumbUrl,diskCache);
-
-
-            ui->wallpaperList->setItemWidget(item, listwidget);
-
-            QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
-            ui->wallpaperList->itemWidget(item)->setGraphicsEffect(eff);
-            QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
-            a->setDuration(500);
-            a->setStartValue(0);
-            a->setEndValue(1);
-            a->setEasingCurve(QEasingCurve::InCirc);
-            a->start(QPropertyAnimation::DeleteWhenStopped);
-            ui->wallpaperList->addItem(item);
-            //set first item in wall_view
-            if(i==0){
-                ui->wallpaperList->setCurrentRow(0);
+            bool toAdd= true;
+            for (int i = 0; i < ui->wallpaperList->count(); i++) {
+                QWidget *listwidget = ui->wallpaperList->itemWidget(ui->wallpaperList->item(i));
+                if(listwidget!=nullptr)
+                {
+                    QLineEdit *fullUrlEdit = listwidget->findChild<QLineEdit*>("fullUrl");
+                    if(fullUrlEdit->text().trimmed()==fullUrl){
+                        toAdd = false;
+                    }
+                }
+                if(toAdd==false){
+                    break;
+                }
             }
-            //keep updaing navigation buttons as we add items synchronously
-            updateNavigationButtons();
+            if(toAdd){
+                QWidget *listwidget = new QWidget(ui->wallpaperList);
+                _ui_listitem.setupUi(listwidget);
+                _ui_listitem.thumbUrl->setText(thumbUrl);
+                _ui_listitem.thumbUrl->hide();
+                _ui_listitem.fullUrl->setText(fullUrl);
+                _ui_listitem.fullUrl->hide();
+
+                listwidget->adjustSize();
+
+                listwidget->setToolTip("<b>"+title+"</b><br>"
+                                                   +copyright+"<br>"
+                                                   +date);
+
+                QListWidgetItem* item;
+                item = new QListWidgetItem(ui->wallpaperList);
+
+                item->setSizeHint(listwidget->minimumSizeHint());
+
+                QString cache_path =  QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+                QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
+                diskCache->setCacheDirectory(cache_path);
+
+
+                _ui_listitem.thumbnail->setScaledContents(true);
+                double ratio  = 178.0/100.0;
+                double height = listwidget->height();
+                double width  = ratio * height;
+
+                _ui_listitem.thumbnail->setPixmap(QPixmap(":/resources/180.jpg").scaled(QSize(width,height),Qt::KeepAspectRatio,Qt::SmoothTransformation));
+                _ui_listitem.thumbnail->setFixedSize(width,height);
+                _ui_listitem.thumbnail->setRemotePixmap(thumbUrl,diskCache);
+
+
+                ui->wallpaperList->setItemWidget(item, listwidget);
+
+                QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
+                ui->wallpaperList->itemWidget(item)->setGraphicsEffect(eff);
+                QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
+                a->setDuration(500);
+                a->setStartValue(0);
+                a->setEndValue(1);
+                a->setEasingCurve(QEasingCurve::InCirc);
+                a->start(QPropertyAnimation::DeleteWhenStopped);
+                ui->wallpaperList->addItem(item);
+                //set first item in wall_view
+                if(i==0){
+                    ui->wallpaperList->setCurrentRow(0);
+                }
+                //keep updaing navigation buttons as we add items synchronously
+                updateNavigationButtons();
+            }
         }
     }
     bool containsWallpapers = data.count() > 0;

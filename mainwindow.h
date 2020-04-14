@@ -44,6 +44,7 @@ private slots:
     void load_data_into_view(QList<QStringList> data);
     void on_wallpaperList_itemClicked(QListWidgetItem *item);
 
+
     void on_left_clicked();
 
     void on_right_clicked();
