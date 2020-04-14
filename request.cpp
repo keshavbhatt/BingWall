@@ -20,6 +20,8 @@ void Request::get(const QUrl url){
         if(rep->error() == QNetworkReply::NoError){
             QString repStr = rep->readAll();
             emit requestFinished(repStr);
+        }else {
+            emit downloadError(rep->errorString());
         }
         rep->deleteLater();
         m_netwManager->deleteLater();
