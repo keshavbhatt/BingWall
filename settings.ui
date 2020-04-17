@@ -39,7 +39,7 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
       <item>
        <widget class="QCheckBox" name="startUp">
         <property name="text">
-         <string>Set wallpaper of the day on Syatem StartUp</string>
+         <string>Set wallpaper of the day on System StartUp</string>
         </property>
        </widget>
       </item>
