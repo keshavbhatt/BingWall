@@ -333,6 +333,8 @@ void MainWindow::init_request()
         if(reply.error() == QNetworkReply::NoError){
             QVariant v = request.attribute(QNetworkRequest::User);
             QString fileName = v.toString();
+            //fix wrong filename bug caused due the presence of "?attachment" in fileName
+            fileName = fileName.remove("?attachment");
             qDebug()<<"IMAGE:File name"<<fileName;
             QFile file(returnPath("downloaded")+fileName);
             if (file.open(QFile::ReadWrite))
