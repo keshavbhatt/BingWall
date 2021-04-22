@@ -79,7 +79,7 @@ private:
     Ui::downloaded_widget _ui_downloaded;
     Ui::downloaded_option_ui _ui_downloaded_option;
     Request * _request = nullptr;
-    QLabel *_wall_view = nullptr;
+    RemotePixmapLabel2 *_wall_view = nullptr;
     WaitingSpinnerWidget *_loader = nullptr;
     QTimer *_loader_timer = nullptr;
     QString _data_path;
@@ -91,6 +91,8 @@ private:
     QWidget *downloaded_widget = nullptr;
 
     QSettings settings;
+
+    QNetworkAccessManager *networkManager_ = nullptr;
 
     int rows,cols;
     bool downloded_loaded = false;

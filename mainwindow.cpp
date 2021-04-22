@@ -19,13 +19,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     setWindowTitle(QApplication::applicationName());
     setWindowIcon(QIcon(":/resources/binfwall_128.png"));
+
+    networkManager_ =  new QNetworkAccessManager(this);
+    QString cache_path =  QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
+    diskCache->setCacheDirectory(cache_path);
+    networkManager_->setCache(diskCache);
+
     init_request();
     _data_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
 
     // wall_view is the child of monitor
-    _wall_view = new QLabel(ui->monitor);
+    _wall_view = new RemotePixmapLabel2(ui->monitor);
     _wall_view->setAlignment(Qt::AlignCenter);
     _wall_view->setPixmap(QPixmap(":/resources/180.jpg"));
     _wall_view->setGeometry(12,26,319,180);
@@ -549,11 +557,6 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
 
                 item->setSizeHint(listwidget->minimumSizeHint());
 
-                QString cache_path =  QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-                QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
-                diskCache->setCacheDirectory(cache_path);
-
-
                 _ui_listitem.thumbnail->setScaledContents(true);
                 double ratio  = 178.0/100.0;
                 double height = listwidget->height();
@@ -561,7 +564,7 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
 
                 _ui_listitem.thumbnail->setPixmap(QPixmap(":/resources/180.jpg").scaled(QSize(width,height),Qt::KeepAspectRatio,Qt::SmoothTransformation));
                 _ui_listitem.thumbnail->setFixedSize(width,height);
-                _ui_listitem.thumbnail->setRemotePixmap(thumbUrl,diskCache);
+                _ui_listitem.thumbnail->init(this->networkManager_,thumbUrl,"qrc:///resources/180.jpg");
 
 
                 ui->wallpaperList->setItemWidget(item, listwidget);
@@ -602,7 +605,8 @@ void MainWindow::on_wallpaperList_itemClicked(QListWidgetItem *item)
             this->_currentUrl = fullUrl->text();
             QLineEdit *thumbUrl = listwidget->findChild<QLineEdit*>("thumbUrl");
             currentWallInfo = listwidget->toolTip();
-            LoadCover(QUrl(thumbUrl->text()),*_wall_view);
+            _wall_view->init(this->networkManager_,thumbUrl->text(),"qrc:///resources/180.jpg");
+            //LoadCover(QUrl(thumbUrl->text()),*_wall_view);
     }
     updateNavigationButtons();
 }
@@ -696,13 +700,16 @@ void MainWindow::on_wonderwall_clicked()
     QDesktopServices::openUrl(QUrl("https://snapcraft.io/wonderwall"));
 }
 
-void MainWindow::setWallpaperOfTheDay(){
-    connect(this,&MainWindow::wallpaperSet,[=](){
+void MainWindow::setWallpaperOfTheDay()
+{
+    connect(this,&MainWindow::wallpaperSet,[=]()
+    {
         if(this->close()==false){
             qApp->quit();
         }
     });
-    connect(this,&MainWindow::wallpaperListLoaded,[=](bool containsWallpapers){
+    connect(this,&MainWindow::wallpaperListLoaded,[=](bool containsWallpapers)
+    {
         if(containsWallpapers){
             ui->wallpaperList->setCurrentRow(0);
             _ui_action.set->click();
