@@ -33,8 +33,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _data_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
 
     // wall_view is the child of monitor
-    _wall_view = new RemotePixmapLabel2(ui->monitor);
+    _wall_view = new QLabel(ui->monitor);
     _wall_view->setAlignment(Qt::AlignCenter);
+
     _wall_view->setPixmap(QPixmap(":/resources/180.jpg"));
     _wall_view->setGeometry(12,26,319,180);
     _wall_view->show();
@@ -52,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ui_action.set,&QPushButton::clicked,[=](){
         //update currentWallInfo before setting wallpaper
         QWidget *listwidget = ui->wallpaperList->itemWidget(ui->wallpaperList->item(ui->wallpaperList->currentRow()));
-        if(listwidget!=nullptr)
+        if(listwidget != nullptr)
         {
            currentWallInfo = listwidget->toolTip();
         }
@@ -202,19 +203,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             const QHoverEvent* const he = static_cast<const QHoverEvent*>( event );
             QWidget *actionWidget = _wall_view->findChild<QWidget*>("actions_view");
             switch(he->type())
-                {
+            {
                 case QEvent::HoverEnter:
                     actionWidget->show();
-
                     break;
                 case QEvent::HoverLeave:
                     if (!_isDownloading)
                     actionWidget->hide();
-
                     break;
                 default:
                     break;
-                }
+            }
 
     }
 
@@ -599,14 +598,13 @@ MainWindow::~MainWindow()
 void MainWindow::on_wallpaperList_itemClicked(QListWidgetItem *item)
 {
     QWidget *listwidget = ui->wallpaperList->itemWidget(item);
-    if(listwidget!=nullptr)
+    if(listwidget != nullptr)
     {
             QLineEdit *fullUrl = listwidget->findChild<QLineEdit*>("fullUrl");
             this->_currentUrl = fullUrl->text();
             QLineEdit *thumbUrl = listwidget->findChild<QLineEdit*>("thumbUrl");
             currentWallInfo = listwidget->toolTip();
-            _wall_view->init(this->networkManager_,thumbUrl->text(),"qrc:///resources/180.jpg");
-            //LoadCover(QUrl(thumbUrl->text()),*_wall_view);
+            LoadCover(QUrl(thumbUrl->text()),*_wall_view);
     }
     updateNavigationButtons();
 }

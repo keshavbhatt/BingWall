@@ -35,7 +35,6 @@ void RemotePixmapLabel2::setRemotePixmap(const QString& url)
     reply = this->networkManager_->get(req);
     connect(reply,SIGNAL(finished()),this,SLOT(pixmapReceived()));
     emit pixmapLoading();
-
 }
 
 void RemotePixmapLabel2::pixmapReceived()
