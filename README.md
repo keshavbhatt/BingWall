@@ -16,6 +16,8 @@ by [@keshavbhatt](https://github.com/keshavbhatt) of [ktechpit.com](http://ktech
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/bing-wall)
 
     snap install bing-wall
+    
+[AUR for Arch based distributions](https://aur.archlinux.org/packages/bing-wall)    
 
 **Features**
 -   Allows list bing wallpaper of the day for 10 Countries (All supported by bing API).
