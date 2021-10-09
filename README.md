@@ -28,6 +28,10 @@ by [@keshavbhatt](https://github.com/keshavbhatt) of [ktechpit.com](http://ktech
 -   Option to show Info Watermark on wallpaper.
 -   Dark Theme.
 
+**Command Line Mode:**
+
+Set wallpaper of the day without opening the GUI with single command. `bing-wall --set`
+
 
 ﻿**Consider Donating if you want this music player grow further**
 
