@@ -122,6 +122,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_ui_settings.startUp,SIGNAL(toggled(bool)),this,SLOT(launch_on_startup_toggled(bool)));
 
+    _ui_settings.fullRes->setChecked(settings.value("fullRes",false).toBool());
+    connect(_ui_settings.fullRes,&QCheckBox::toggled,[=](bool checked){
+        settings.setValue("fullRes",checked);
+    });
+
     _ui_settings.watermark->setChecked(settings.value("watermark",false).toBool());
     connect(_ui_settings.watermark,&QCheckBox::toggled,[=](bool checked){
         settings.setValue("watermark",checked);
@@ -194,6 +199,9 @@ QString MainWindow::returnPath(QString pathname)
 
 void MainWindow::setWallpaper()
 {
+    if(settings.value("fullRes",false).toBool()==true){
+        _currentUrl = _currentUrl.remove("_1080");
+    }
     _request->download_wallpaper(QUrl(_currentUrl));
 }
 
