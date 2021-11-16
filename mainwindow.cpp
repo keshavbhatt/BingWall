@@ -502,15 +502,14 @@ void MainWindow::parse_json_reply(const QString reply)
     QJsonArray jsonArray = jsonResponse.array();
     foreach (const QJsonValue &val, jsonArray) {
         QJsonObject object = val.toObject();
-        QString title,copyright,imageUrl,fullUrl,thumbUrl,date;
+        QString title,copyright,fullUrl,thumbUrl,date;
         title       =   object.value("title").toString();
         copyright   =   object.value("copyright").toString();
         fullUrl     =   object.value("fullUrl").toString();
         thumbUrl    =   object.value("thumbUrl").toString();
         date        =   object.value("date").toString();
-        imageUrl    =   object.value("imageUrl").toString();
 
-        QStringList item = {title,copyright,fullUrl,thumbUrl,date,imageUrl};
+        QStringList item = {title,copyright,fullUrl,thumbUrl,date};
         if(data.contains(item) == false )
             data.append(item);
     }
@@ -523,16 +522,15 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
     for (int i = 0; i < data.count(); i++)
     {
         QStringList item_meta = data.at(i);
-        if(item_meta.count()==6)
+        if(item_meta.count()==5)
         {
-            QString title,copyright,fullUrl,thumbUrl,date,imageUrl;
+            QString title,copyright,fullUrl,thumbUrl,date;
             title       =   item_meta.at(0);
             copyright   =   item_meta.at(1);
             fullUrl     =   item_meta.at(2);
             thumbUrl    =   item_meta.at(3);
             date        =   item_meta.at(4);
             thumbUrl    =    thumbUrl.replace("_480","_200");
-            imageUrl    =   item_meta.at(5);
 
             bool toAdd= true;
             for (int i = 0; i < ui->wallpaperList->count(); i++) {
@@ -553,8 +551,7 @@ void MainWindow::load_data_into_view(QList<QStringList> data){
                 _ui_listitem.setupUi(listwidget);
                 _ui_listitem.thumbUrl->setText(thumbUrl);
                 _ui_listitem.thumbUrl->hide();
-                //_ui_listitem.fullUrl->setText(fullUrl);
-                _ui_listitem.fullUrl->setText(imageUrl);
+                _ui_listitem.fullUrl->setText(fullUrl);
                 _ui_listitem.fullUrl->hide();
 
                 listwidget->adjustSize();
