@@ -2,7 +2,7 @@
 Bing wallpaper of the day application for Gnome desktop
 
 <p align="center">
-  <img width="200" height="200" src="https://github.com/keshavbhatt/BingWall/blob/master/icons/binfwall.png?raw=true">
+  <img width="200" height="200" src="https://github.com/keshavbhatt/BingWall/blob/master/src/icons/binfwall.png?raw=true">
 </p>
 
 Little utility to browse/download/setting bing's wallpaper of the day to Gnome desktop by [@keshavbhatt](https://github.com/keshavbhatt) of [ktechpit.com](http://ktechpit.com) and [others](https://github.com/keshavbhatt//graphs/contributors)
