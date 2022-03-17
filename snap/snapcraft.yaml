@@ -1,23 +1,29 @@
 name: bing-wall
-version: '2.0'
+version: '2.1'
 summary: Bing Wallpaper of the day to Gnome Desktop
 description: |
   Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
+  
 grade: stable
 confinement: strict
 icon: snap/gui/icon.png
-base: core18
+base: core20
+compression : lzo
 
 architectures:
   - build-on: amd64
     run-on: amd64
-
+    
+environment:
+  SNAP_DESKTOP_RUNTIME: $SNAP/qt5-core20
+  
 apps:
   bing-wall:
-    command: desktop-launch bing-wall
+    command: bin/desktop-launch $SNAP/usr/bin/bing-wall
     autostart: BingWall.desktop
     environment:
        DISABLE_WAYLAND: 1
+       IS_SNAP: 1
     desktop: usr/share/applications/bingwall.desktop
     plugs:
         - home
@@ -29,6 +35,7 @@ apps:
         - network-manager
         - gsettings
         - desktop-legacy
+        - wayland
 
 plugs:
   gsettings:
@@ -44,40 +51,36 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
-  qt551:
+  qt5-core20:
     interface: content
-    target: $SNAP/qt551
-    default-provider: qt551
+    target: $SNAP/qt5-core20
+    default-provider: qt5-core20
 
 parts:
-   gsettings:
-     plugin: nil
-     stage-packages:
-            - libglib2.0-bin
-   application:
-     source-type: git
-     source: https://github.com/keshavbhatt/BingWall.git
-     plugin: qmake
-     qt-version: qt5
-     override-build: |
-            snapcraftctl build
-            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${SNAPCRAFT_PART_SRC}/bingwall.desktop
-            cp -rf ${SNAPCRAFT_PART_SRC}/bingwall.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
-     after: [desktop-qt5]
-
-   snap-launcher:
-     plugin: dump
-     source: snap_launcher/
-   desktop-qt5:
+   desktop-qt5-build:
      plugin: nil
      build-packages:
        - build-essential
        - qtbase5-dev
        - dpkg-dev
-   cleanup:
-       after: [application]
-       plugin: nil
-       override-prime: |
-          # Remove unneeded stage files to save space
-          cd usr/share
-          rm -rf apport bash-completion bug doc doc-base icons lintian man pam-configs pkgconfig themes upstart zsh
+     
+   build-src:
+     source-type: git
+     source: https://github.com/keshavbhatt/BingWall.git
+     source-subdir: src/
+     plugin: qmake
+     after: [desktop-qt5-build]
+     override-build: |
+            snapcraftctl build
+            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${SNAPCRAFT_PART_SRC}/src/bingwall.desktop
+            mkdir -p ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/
+            cp -rf ${SNAPCRAFT_PART_SRC}/src/bingwall.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
+
+   desktop-launch:
+     plugin: nil
+     source: https://github.com/keshavbhatt/qt5-core20.git
+     after: [build-src]
+     override-build: |
+            snapcraftctl build
+            mkdir -p ${SNAPCRAFT_PART_INSTALL}/bin/
+            cp -rf ${SNAPCRAFT_PART_SRC}/snap_launcher/bin/desktop-launch ${SNAPCRAFT_PART_INSTALL}/bin/
