@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     connect(_ui_downloaded.open_download_dir,&controlButton::clicked,[=](){
-       QDesktopServices::openUrl(QUrl(returnPath("downloaded")));
+       utils::desktopOpenUrl(QUrl(returnPath("downloaded")));
     });
 
     check_for_startup();
@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget *parent) :
          QDesktopServices::openUrl(QUrl("https://paypal.me/keshavnrj/4"));
     });
     connect(_ui_settings.downloads,&QPushButton::clicked,[=](){
-         QDesktopServices::openUrl(QUrl(returnPath("downloaded")));
+         utils::desktopOpenUrl(returnPath("downloaded"));
     });
 
     for (int i = 0; i < _ui_settings.locationCombo->count(); i++) {

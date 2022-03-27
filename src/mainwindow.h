@@ -9,6 +9,7 @@
 
 #include "request.h"
 #include "waitingspinnerwidget.h"
+#include "utils.h"
 
 #include "ui_listitem_ui.h"
 #include "ui_action_ui.h"
