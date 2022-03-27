@@ -40,6 +40,7 @@ SOURCES += \
         remotepixmaplabel2.cpp \
         request.cpp \
         scrolltext.cpp \
+        utils.cpp \
         waitingspinnerwidget.cpp
 
 HEADERS += \
@@ -50,6 +51,7 @@ HEADERS += \
         remotepixmaplabel2.h \
         request.h \
         scrolltext.h \
+        utils.h \
         waitingspinnerwidget.h
 
 FORMS += \
