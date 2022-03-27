@@ -13,6 +13,8 @@
 #include <QPainter>
 #include <QImage>
 #include <QTextBrowser>
+#include <QUrl>
+#include <QUrl>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -115,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     connect(_ui_downloaded.open_download_dir,&controlButton::clicked,[=](){
-       utils::desktopOpenUrl(QUrl(returnPath("downloaded")));
+       utils::desktopOpenUrl(returnPath("downloaded"));
     });
 
     check_for_startup();

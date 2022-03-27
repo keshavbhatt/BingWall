@@ -83,7 +83,7 @@ public slots:
     static bool isImage(QString filename);
     static QString cleanString(QString input);
     static QString genRand(int length);
-    static bool desktopOpenUrl(const QString str);
+    static void desktopOpenUrl(const QString str);
 private slots:
     //use refreshCacheSize
     static quint64 dir_size(const QString &directory);

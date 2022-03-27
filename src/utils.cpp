@@ -309,8 +309,8 @@ QString utils::randomIpV6() {
   return randomString.trimmed().simplified().remove(" ");
 }
 
-bool utils::desktopOpenUrl(const QString str){
-    QProcess *xdg_open = new QProcess(this);
+void utils::desktopOpenUrl(const QString str){
+    QProcess *xdg_open = new QProcess(0);
     xdg_open->start("xdg-open", QStringList() << str);
     if (xdg_open->waitForStarted(1000) == false) {
       // try using QdesktopServices
@@ -323,7 +323,7 @@ bool utils::desktopOpenUrl(const QString str){
         xdg_open,
         static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
             &QProcess::finished),
-        [this, xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
+        [xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
           Q_UNUSED(exitCode);
           Q_UNUSED(exitStatus);
           xdg_open->close();
