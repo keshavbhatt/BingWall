@@ -477,7 +477,19 @@ void MainWindow::apply_wallpaper(QString filePath)
     gsettings->closeReadChannel(QProcess::StandardOutput);
     gsettings->closeReadChannel(QProcess::StandardError);
     gsettings->closeWriteChannel();
-    gsettings->start("gsettings",QStringList()<<"set"<<"org.gnome.desktop.background"<<"picture-uri"
+
+    gsettings->start("gsettings",QStringList()<<"get"<<"org.gnome.desktop.interface"<<"color-scheme");
+    gsettings->waitForFinished();
+    QString colorScheme(gsettings->readAllStandardOutput().trimmed());
+    QString picture_uri;
+
+    if(colorScheme == "'prefer-dark'"){
+        picture_uri = "picture-uri-dark";
+    }else{
+        picture_uri = "picture-uri";
+    }
+
+    gsettings->start("gsettings",QStringList()<<"set"<<"org.gnome.desktop.background"<<picture_uri
                      <<"file://"+filePath);
     if(!gsettings->waitForFinished()){
           qDebug()<<"GSETTINGS:Process failed:"<< gsettings->errorString();
