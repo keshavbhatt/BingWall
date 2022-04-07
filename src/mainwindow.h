@@ -69,9 +69,9 @@ private slots:
 
     void check_for_startup();
     void launch_on_startup_toggled(bool arg1);
-    void donot_run_onStartupp();
-    void run_onstartup();
+    void run_onstartup(bool enabled);
     bool saveWall(const QString &path, QString imagePath);
+    void updateAbout();
 private:
     Ui::MainWindow *ui;
     Ui::thumbWidget _ui_listitem;

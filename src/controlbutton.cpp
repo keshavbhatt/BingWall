@@ -1,25 +1,24 @@
 #include "controlbutton.h"
-#include <QToolTip>
 #include <QEvent>
 #include <QMouseEvent>
+#include <QToolTip>
 
-controlButton::controlButton(QWidget *parent)
-    : QPushButton(parent)
-{
-    setMouseTracking(true);
+controlButton::controlButton(QWidget *parent) : QPushButton(parent) {
+  setMouseTracking(true);
 }
 
-bool controlButton::eventFilter(QObject *obj, QEvent *event){
-    Q_UNUSED(obj);
-    if(event->type() == QEvent::ToolTip){
-        return true;
-    }
-    return false;
+bool controlButton::eventFilter(QObject *obj, QEvent *event) {
+  Q_UNUSED(obj);
+  if (event->type() == QEvent::ToolTip) {
+    return true;
+  }
+  return false;
 }
 
-void controlButton::mouseMoveEvent(QMouseEvent *e){
+void controlButton::mouseMoveEvent(QMouseEvent *e) {
 
-    QToolTip::showText(this->mapToGlobal(e->localPos().toPoint()),this->toolTip());
+  QToolTip::showText(this->mapToGlobal(e->localPos().toPoint()),
+                     this->toolTip());
 
-    QPushButton::mouseMoveEvent(e);
+  QPushButton::mouseMoveEvent(e);
 }
