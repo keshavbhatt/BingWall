@@ -22,22 +22,18 @@ apps:
     command: bin/desktop-launch $SNAP/usr/bin/bing-wall
     autostart: BingWall.desktop
     environment:
-       DISABLE_WAYLAND: 1
        IS_SNAP: 1
        NO_AT_BRIDGE: 1
     desktop: usr/share/applications/bingwall.desktop
     plugs:
-        - home
-        - unity7
-        - network
-        - opengl
-        - x11
         - desktop
-        - gsettings
         - desktop-legacy
-        - network-manager
-        - network-observe
-        - network-bind
+        - gsettings
+        - home
+        - opengl
+        - unity7
+        - x11
+        - network
         - wayland
 
 plugs:
