@@ -1,51 +1,41 @@
 #include "request.h"
 
-Request::Request(QObject *parent) : QObject(parent) {
-  setParent(parent);
-  _cache_path = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+Request::Request(QObject *parent, QNetworkAccessManager *nm) : QObject(parent) {
+  this->networkAccessManager = nm;
 }
 
 Request::~Request() { this->deleteLater(); }
 
 void Request::get(const QUrl url) {
-  QNetworkAccessManager *m_netwManager = new QNetworkAccessManager(this);
-  QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
-  diskCache->setCacheDirectory(_cache_path);
-  m_netwManager->setCache(diskCache);
-  connect(m_netwManager, &QNetworkAccessManager::finished,
-          [=](QNetworkReply *rep) {
-            if (rep->error() == QNetworkReply::NoError) {
-              QString repStr = rep->readAll();
-              emit requestFinished(repStr);
-            } else {
-              emit downloadError(rep->errorString());
-            }
-            rep->deleteLater();
-            m_netwManager->deleteLater();
-          });
   QNetworkRequest request(url);
-  m_netwManager->get(request);
+  QNetworkReply *reply = networkAccessManager->get(request);
+  connect(reply, &QNetworkReply::finished, [=]() {
+    if (reply->error() == QNetworkReply::NoError) {
+      QString repStr = reply->readAll();
+      emit requestFinished(repStr);
+    } else {
+      emit downloadError(reply->errorString());
+    }
+    reply->deleteLater();
+  });
   emit requestStarted();
 }
 
 void Request::download_wallpaper(const QUrl url) {
-  QNetworkAccessManager *m_netwManager = new QNetworkAccessManager(this);
-  QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
-  diskCache->setCacheDirectory(_cache_path);
-  m_netwManager->setCache(diskCache);
-  connect(m_netwManager, &QNetworkAccessManager::finished,
-          [=](QNetworkReply *rep) {
-            if (rep->error() == QNetworkReply::NoError) {
-              emit downloadFinished(*rep);
-            } else {
-              emit downloadError(rep->errorString());
-            }
-          });
+
   QNetworkRequest request(url);
   QString imageFileName = url.toString().split("/").last();
   request.setAttribute(QNetworkRequest::User, imageFileName);
 
-  QNetworkReply *reply = m_netwManager->get(request);
+  QNetworkReply *reply = networkAccessManager->get(request);
+  connect(reply, &QNetworkReply::finished, [=]() {
+    if (reply->error() == QNetworkReply::NoError) {
+      emit downloadFinished(*reply);
+    } else {
+      emit downloadError(reply->errorString());
+    }
+    reply->deleteLater();
+  });
   connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this,
           SLOT(downloadProgress(qint64, qint64)));
   emit downloadStarted();

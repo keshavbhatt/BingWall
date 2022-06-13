@@ -54,7 +54,7 @@ private slots:
 
     void setWallpaper();
     QString returnPath(QString pathname);
-    void init_request();
+    void init_request(QNetworkAccessManager *nm);
     void apply_wallpaper(QString filePath);
     void on_setting_clicked();
 

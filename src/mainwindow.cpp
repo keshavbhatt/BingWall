@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
   diskCache->setCacheDirectory(cache_path);
   networkManager_->setCache(diskCache);
 
-  init_request();
+  init_request(networkManager_);
   _data_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
 
   // wall_view is the child of monitor
@@ -328,8 +328,8 @@ void MainWindow::refreshLoader() {
   }
 }
 
-void MainWindow::init_request() {
-  _request = new Request(this);
+void MainWindow::init_request(QNetworkAccessManager *nm) {
+  _request = new Request(this, nm);
   connect(_request, &Request::requestStarted, [=]() {
     _loader->start();
     refreshLoader();
@@ -346,6 +346,7 @@ void MainWindow::init_request() {
     _ui_action.set->setEnabled(false);
     _ui_action.progressBar->show();
   });
+
   connect(_request, &Request::downloadFinished, [=](QNetworkReply &reply) {
     _isDownloading = false;
     _ui_action.progressBar->setMinimum(0);
@@ -387,7 +388,6 @@ void MainWindow::init_request() {
       load_downloaded_wallpapers();
     }
     reply.deleteLater();
-    reply.manager()->deleteLater();
   });
   connect(_request, &Request::_downloadProgress, [=](int progress) {
     if (progress > 0) {
@@ -402,7 +402,6 @@ void MainWindow::init_request() {
     _ui_action.progressBar->setMaximum(0);
     _ui_action.progressBar->hide();
     _ui_action.set->setEnabled(true);
-    qDebug() << errorString;
   });
 }
 
@@ -482,6 +481,7 @@ void MainWindow::apply_wallpaper(QString filePath) {
     if (QFileInfo(filePath).exists() == false)
       filePath = filePath + ".png";
   }
+
   QProcess *gsettings = new QProcess(this);
   gsettings->closeReadChannel(QProcess::StandardOutput);
   gsettings->closeReadChannel(QProcess::StandardError);
@@ -500,16 +500,17 @@ void MainWindow::apply_wallpaper(QString filePath) {
     picture_uri = "picture-uri";
   }
 
-  gsettings->start("gsettings", QStringList()
-                                    << "set"
-                                    << "org.gnome.desktop.background"
-                                    << picture_uri << "file://" + filePath);
+  gsettings->start("gsettings", QStringList() << "set"
+                                              << "org.gnome.desktop.background"
+                                              << picture_uri
+                                              << "file://" + filePath);
   if (!gsettings->waitForFinished()) {
     qDebug() << "GSETTINGS:Process failed:" << gsettings->errorString();
   } else {
     qDebug() << "GSETTINGS:Process success:";
     emit wallpaperSet();
   }
+  gsettings->deleteLater();
 }
 
 void MainWindow::load_wallpapers() {
@@ -604,8 +605,12 @@ void MainWindow::load_data_into_view(QList<QStringList> data) {
         ui->wallpaperList->setItemWidget(item, listwidget);
 
         QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
-        ui->wallpaperList->itemWidget(item)->setGraphicsEffect(eff);
+        auto *itemWidget = ui->wallpaperList->itemWidget(item);
+        itemWidget->setGraphicsEffect(eff);
         QPropertyAnimation *a = new QPropertyAnimation(eff, "opacity");
+        connect(a, &QPropertyAnimation::finished,[=](){
+            itemWidget->graphicsEffect()->deleteLater();
+        });
         a->setDuration(500);
         a->setStartValue(0);
         a->setEndValue(1);
@@ -780,17 +785,14 @@ void MainWindow::run_onstartup(bool enabled) {
   QString data = "[Desktop Entry]\n"
                  "Type=Application\n"
                  "Exec=" +
-                 launcher +
-                 " --set\n"
-                 "Hidden=false\n"
-                 "NoDisplay=false\n"
-                 "Name[en_IN]=" +
-                 launcher_name +
-                 "\n"
-                 "Name=" +
-                 launcher_name +
-                 "\n"
-                 "X-GNOME-Autostart-enabled=true";
+                 launcher + " --set\n"
+                            "Hidden=false\n"
+                            "NoDisplay=false\n"
+                            "Name[en_IN]=" +
+                 launcher_name + "\n"
+                                 "Name=" +
+                 launcher_name + "\n"
+                                 "X-GNOME-Autostart-enabled=true";
   QString autostartpath = QDir::homePath() + "/.config/autostart";
 
   QDir dir;

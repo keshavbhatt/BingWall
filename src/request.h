@@ -9,7 +9,7 @@ class Request : public QObject
     Q_OBJECT
 
 public:
-    Request(QObject* parent=0);
+    Request(QObject* parent=0, QNetworkAccessManager *nm=nullptr);
     virtual ~Request();
 public slots:
     void get(const QUrl url);
@@ -25,7 +25,7 @@ signals:
 private slots:
    void downloadProgress(qint64 got, qint64 tot);
 private:
-   QString _cache_path;
+   QNetworkAccessManager *networkAccessManager= nullptr;
 };
 
 #endif // REQUEST_H
