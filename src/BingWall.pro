@@ -12,7 +12,7 @@ TARGET = bing-wall
 TEMPLATE = app
 
 # Set program version
-VERSION = 2.3
+VERSION = 2.4
 DEFINES += VERSIONSTR=\\\"$${VERSION}\\\"
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT

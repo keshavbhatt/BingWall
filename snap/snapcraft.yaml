@@ -1,5 +1,5 @@
 name: bing-wall
-version: '2.3'
+version: '2.4'
 summary: Bing Wallpaper of the day to Gnome Desktop
 description: |
   Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
@@ -7,7 +7,7 @@ description: |
 grade: stable
 confinement: strict
 icon: snap/gui/icon.png
-base: core20
+base: core22
 compression : lzo
 
 architectures:
@@ -15,7 +15,7 @@ architectures:
     run-on: amd64
     
 environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/qt5-core20
+  SNAP_DESKTOP_RUNTIME: $SNAP/qt5-core22
   
 apps:
   bing-wall:
@@ -54,10 +54,10 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
-  qt5-core20:
+  qt5-core22:
     interface: content
-    target: $SNAP/qt5-core20
-    default-provider: qt5-core20
+    target: $SNAP/qt5-core22
+    default-provider: qt5-core22
 
 parts:
    desktop-qt5-build:
@@ -81,7 +81,7 @@ parts:
 
    desktop-launch:
      plugin: nil
-     source: https://github.com/keshavbhatt/qt5-core20.git
+     source: https://github.com/keshavbhatt/qt5-core22.git
      after: [build-src]
      override-build: |
             snapcraftctl build
