@@ -103,6 +103,11 @@ background-color: qlineargradient(spread:pad, x1:0.518, y1:1, x2:0.518, y2:0.15,
           </item>
           <item>
            <property name="text">
+            <string>Turkey</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>United Kingdom</string>
            </property>
           </item>
