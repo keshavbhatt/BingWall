@@ -61,23 +61,11 @@ Build:
     qmake (or qmake-qt5, depending on your distro)
     make
     
-Execute :
+Execute, from build directory run :
 
     ./bing-wall
      
 ﻿
-﻿**Or build a snap package**
-Copy snap directory from project root and paste it somewhere else (so the build will not mess with source code)
-Run :
-
-    snapcraft
-Try snap with :
-
-    snap try
-Install snap with
-
-    snap install --dangerous name_of_snap_file
-
 **ScreenShots:** (could be old)
 
 ![BingWall for Linux Desktop](https://github.com/keshavbhatt/BingWall/blob/master/screenshots/1.png?raw=true)
