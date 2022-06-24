@@ -18,7 +18,7 @@ Little utility to browse/download/setting bing's wallpaper of the day to Gnome d
 
     snap install bing-wall
     
-[AUR for Arch based distributions](https://aur.archlinux.org/packages/bing-wall)    
+[AUR for Arch based distributions](https://aur.archlinux.org/packages/bingwall-git)
 
 **Features**
 -   Allows list bing wallpaper of the day for 10 Countries (All supported by bing API).
