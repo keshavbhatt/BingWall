@@ -12,7 +12,6 @@ compression : lzo
 
 architectures:
   - build-on: amd64
-    run-on: amd64
     
 environment:
   SNAP_DESKTOP_RUNTIME: $SNAP/qt5-core22
@@ -64,7 +63,6 @@ parts:
        - dpkg-dev
      
    build-src:
-     source-type: git
      source: https://github.com/keshavbhatt/BingWall.git
      source-subdir: src/
      plugin: qmake
