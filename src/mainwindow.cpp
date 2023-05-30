@@ -720,6 +720,11 @@ void MainWindow::on_downloaded_clicked() {
   }
 }
 
+// Custom comparator function to compare QFileInfo objects by last modified date
+bool compareByLastModified(const QFileInfo& fileInfo1, const QFileInfo& fileInfo2) {
+    return fileInfo1.lastModified() > fileInfo2.lastModified();
+}
+
 void MainWindow::load_downloaded_wallpapers() {
   // clear
   for (int i = 0; i < _ui_downloaded.gridLayout->columnCount(); i++) {
@@ -730,13 +735,20 @@ void MainWindow::load_downloaded_wallpapers() {
   filter << +"*.jpg"
          << "*.png";
   QFileInfoList files = dir.entryInfoList(filter);
+
+  // Convert the QFileInfoList to a vector for sorting
+  std::vector<QFileInfo> fileInfoVector(files.begin(), files.end());
+
+  // Sort the vector by modified date in descending order (recent files first)
+  std::sort(fileInfoVector.begin(), fileInfoVector.end(), compareByLastModified);
+
   cols = 4;
-  rows = files.count() / cols;
+  rows = fileInfoVector.size() / cols;
   _ui_downloaded.info->setText("<html><head/><body><p><span style=' "
                                "font-size:16pt; color:#9fa0a4;'>Total items: " +
-                               QString::number(files.count()) +
+                               QString::number(fileInfoVector.size()) +
                                "</span></p></body></html>");
-  foreach (QFileInfo fileInfo, files) {
+  foreach (QFileInfo fileInfo, fileInfoVector) {
     QLabel *label = new QLabel;
     label->setAlignment(Qt::AlignCenter);
     label->setObjectName("downloaded_wall-" + fileInfo.completeBaseName());
