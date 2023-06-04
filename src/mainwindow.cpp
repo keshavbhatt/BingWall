@@ -729,7 +729,7 @@ void MainWindow::load_downloaded_wallpapers() {
   QStringList filter;
   filter << +"*.jpg"
          << "*.png";
-  QFileInfoList files = dir.entryInfoList(filter);
+  QFileInfoList files = dir.entryInfoList(filter, QDir::Files, QDir::Time);
   cols = 4;
   rows = files.count() / cols;
   _ui_downloaded.info->setText("<html><head/><body><p><span style=' "
