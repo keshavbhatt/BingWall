@@ -88,6 +88,8 @@ private slots:
     //use refreshCacheSize
     static quint64 dir_size(const QString &directory);
 
+private:
+static const char * QRegExp(const char *);
 };
 
 #endif // UTILS_H
