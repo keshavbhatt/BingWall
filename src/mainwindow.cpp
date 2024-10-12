@@ -3,7 +3,6 @@
 
 #include "gridlayoututil.h"
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <QGraphicsOpacityEffect>
 #include <QHoverEvent>
 #include <QImage>
@@ -31,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
   networkManager_->setCache(diskCache);
 
   init_request(networkManager_);
-  _data_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+  _data_path =
+      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
   // wall_view is the child of monitor
   _wall_view = new QLabel(ui->monitor);
@@ -148,8 +148,13 @@ MainWindow::MainWindow(QWidget *parent)
              << "gb"
              << "us";
 
-  connect(_ui_settings.locationCombo, SIGNAL(currentIndexChanged(QString)),
-          this, SLOT(location_changed(QString)));
+  // connect(_ui_settings.locationCombo, &QComboBox::currentIndexChanged, this,
+  //         &MainWindow::location_changed);
+
+  connect(_ui_settings.locationCombo,
+          QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
+            location_changed(_ui_settings.locationCombo->itemText(index));
+          });
 
   _ui_settings.locationCombo->setCurrentIndex(
       settings.value("location", "9").toInt());
@@ -223,50 +228,47 @@ void MainWindow::setWallpaper() {
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+  if (event->type() != QEvent::HoverEnter &&
+      event->type() != QEvent::HoverLeave) {
+    return QMainWindow::eventFilter(obj, event);
+  }
+
+  const QHoverEvent *he = dynamic_cast<const QHoverEvent *>(event);
+  if (!he) {
+    qWarning() << "Event is not a QHoverEvent.";
+    return QMainWindow::eventFilter(obj, event);
+  }
+
+  QPointer<QWidget> actionWidget =
+      _wall_view->findChild<QWidget *>("actions_view");
   if (obj == _wall_view && !_currentUrl.isEmpty()) {
-    const QHoverEvent *const he = static_cast<const QHoverEvent *>(event);
-    QWidget *actionWidget = _wall_view->findChild<QWidget *>("actions_view");
-    switch (he->type()) {
-    case QEvent::HoverEnter:
-      actionWidget->show();
-      break;
-    case QEvent::HoverLeave:
-      if (!_isDownloading)
+    if (actionWidget) {
+      if (event->type() == QEvent::HoverEnter) {
+        actionWidget->show();
+      } else if (event->type() == QEvent::HoverLeave && !_isDownloading) {
         actionWidget->hide();
-      break;
-    default:
-      break;
+      }
+    } else {
+      qWarning() << "actions_view widget not found.";
     }
   }
 
   if (obj == ui->wonderwall) {
-    const QHoverEvent *const he = static_cast<const QHoverEvent *>(event);
-    switch (he->type()) {
-    case QEvent::HoverEnter:
+    if (event->type() == QEvent::HoverEnter) {
       ui->wonderwall->setIcon(QIcon(":/resources/wonderwall2.png"));
-      break;
-    case QEvent::HoverLeave:
+    } else if (event->type() == QEvent::HoverLeave) {
       ui->wonderwall->setIcon(QIcon(":/resources/wonderwall.png"));
-      break;
-    default:
-      break;
     }
   }
-  if (obj->objectName().contains("downloaded_wall-")) {
-    const QHoverEvent *const he = static_cast<const QHoverEvent *>(event);
-    switch (he->type()) {
-    case QEvent::HoverEnter:
-      show_option_for_downloaded(obj);
-      break;
-    case QEvent::HoverLeave:
-      if (!_isDownloading)
-        hide_option_for_downloaded(obj);
 
-      break;
-    default:
-      break;
+  if (obj->objectName().contains("downloaded_wall-")) {
+    if (event->type() == QEvent::HoverEnter) {
+      show_option_for_downloaded(obj);
+    } else if (event->type() == QEvent::HoverLeave && !_isDownloading) {
+      hide_option_for_downloaded(obj);
     }
   }
+
   return QMainWindow::eventFilter(obj, event);
 }
 
@@ -312,12 +314,36 @@ void MainWindow::show_option_for_downloaded(QObject *obj) {
     option_widget->show();
   }
 }
+
 void MainWindow::hide_option_for_downloaded(QObject *obj) {
-  QWidget *option_widget =
-      obj->findChild<QWidget *>("option_" + obj->objectName());
-  if (option_widget != nullptr) {
+  if (!obj) {
+    qWarning() << "Received a null object.";
+    return;
+  }
+
+  QWidget *widget = dynamic_cast<QWidget *>(obj);
+  if (!widget) {
+    qWarning() << "Object is not a QWidget or has been deleted.";
+    return;
+  }
+
+  QString widgetName = "option_" + widget->objectName();
+
+  for (QObject *child : widget->children()) {
+    if (!child) {
+      qDebug() << "Found a null child!";
+      return;
+    }
+  }
+
+  QPointer<QWidget> option_widget = widget->findChild<QWidget *>(widgetName);
+  if (option_widget) {
     option_widget->hide();
+    option_widget->disconnect();
     option_widget->deleteLater();
+  } else {
+    qWarning() << "Widget with name" << widgetName
+               << "not found or already deleted.";
   }
 }
 
@@ -398,6 +424,7 @@ void MainWindow::init_request(QNetworkAccessManager *nm) {
     }
   });
   connect(_request, &Request::downloadError, [=](QString errorString) {
+    qWarning() << errorString;
     _isDownloading = false;
     _ui_action.progressBar->setMinimum(0);
     _ui_action.progressBar->setMaximum(0);
@@ -528,18 +555,20 @@ void MainWindow::parse_json_reply(const QString reply) {
   }
   QList<QStringList> data;
   QJsonArray jsonArray = jsonResponse.array();
-  foreach (const QJsonValue &val, jsonArray) {
+
+  for (const QJsonValue &val : jsonArray) {
     QJsonObject object = val.toObject();
-    QString title, copyright, fullUrl, thumbUrl, date;
-    title = object.value("title").toString();
-    copyright = object.value("copyright").toString();
-    fullUrl = object.value("fullUrl").toString();
-    thumbUrl = object.value("thumbUrl").toString();
-    date = object.value("date").toString();
+
+    QString title = object.value("title").toString();
+    QString copyright = object.value("copyright").toString();
+    QString fullUrl = object.value("fullUrl").toString();
+    QString thumbUrl = object.value("thumbUrl").toString();
+    QString date = object.value("date").toString();
 
     QStringList item = {title, copyright, fullUrl, thumbUrl, date};
-    if (data.contains(item) == false)
+    if (!data.contains(item)) {
       data.append(item);
+    }
   }
   // load data into view
   load_data_into_view(data);
@@ -673,7 +702,11 @@ void MainWindow::on_wallpaperList_currentRowChanged(int currentRow) {
 
 void MainWindow::on_setting_clicked() {
   if (!setting_widget->isVisible()) {
-    setting_widget->move(QApplication::desktop()->geometry().center());
+    QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
+    QPoint centerPoint =
+        screenGeometry.center() - setting_widget->rect().center();
+
+    setting_widget->move(centerPoint);
     check_for_startup();
     setting_widget->show();
   }
@@ -727,8 +760,7 @@ void MainWindow::load_downloaded_wallpapers() {
   }
   QDir dir(returnPath("downloaded"));
   QStringList filter;
-  filter << +"*.jpg"
-         << "*.png";
+  filter << +"*.jpg" << "*.png";
   QFileInfoList files = dir.entryInfoList(filter, QDir::Files, QDir::Time);
   cols = 4;
   rows = files.count() / cols;
@@ -808,7 +840,7 @@ void MainWindow::run_onstartup(bool enabled) {
   if (enabled) {
     if (autostartfile.open(QIODevice::WriteOnly)) {
       QTextStream stream(&autostartfile);
-      stream << data << endl;
+      stream << data << Qt::endl;
     }
   } else {
     QFile(autostartpath + "/" + launcher_name + ".desktop").remove();

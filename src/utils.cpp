@@ -2,6 +2,7 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QProcess>
+#include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QUuid>
 
@@ -58,14 +59,14 @@ bool utils::delete_cache(const QString cache_dir) {
 
 // returns string with first letter capitalized
 QString utils::toCamelCase(const QString &s) {
-  QStringList parts = s.split(' ', QString::SkipEmptyParts);
+  QStringList parts = s.split(' ', Qt::SkipEmptyParts);
   for (int i = 0; i < parts.size(); ++i)
     parts[i].replace(0, 1, parts[i][0].toUpper());
   return parts.join(" ");
 }
 
 QString utils::upperFirstChar(const QString &s) {
-  QStringList parts = s.split(' ', QString::SkipEmptyParts);
+  QStringList parts = s.split(' ', Qt::SkipEmptyParts);
   for (int i = 0; i < parts.size(); ++i) {
     if (i == 0) {
       parts[i].replace(0, 1, parts[i][0].toUpper());
@@ -94,20 +95,23 @@ QString utils::generateRandomId(int length) {
 
 QString utils::genRand(int length) {
   QDateTime cd = QDateTime::currentDateTime();
-  const QString possibleCharacters(
+
+  const QString possibleCharacters =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" +
       QString::number(cd.currentMSecsSinceEpoch())
-          .remove(QRegExp("[^a-zA-Z\\d\\s]")));
+          .remove(QRegularExpression("[^a-zA-Z\\d\\s]"));
 
-  const int randomStringLength = length;
   QString randomString;
-  qsrand(cd.toTime_t());
-  for (int i = 0; i < randomStringLength; ++i) {
-    int index = qrand() % possibleCharacters.length();
+  QRandomGenerator *generator = QRandomGenerator::global();
+
+  for (int i = 0; i < length; ++i) {
+    int index = generator->bounded(possibleCharacters.length());
     QChar nextChar = possibleCharacters.at(index);
     randomString.append(nextChar);
   }
+
   randomString = randomString.trimmed().simplified();
+
   return randomString;
 }
 
@@ -132,7 +136,7 @@ QString utils::convertSectoDay(qint64 secs) {
 // static on demand path maker
 QString utils::returnPath(QString pathname) {
   QString _data_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
   if (!QDir(_data_path + "/" + pathname).exists()) {
     QDir d(_data_path + "/" + pathname);
     d.mkpath(_data_path + "/" + pathname);
@@ -160,7 +164,7 @@ bool utils::splitString(const QString &str, int m, QStringList &list) {
     QString strPart;
     if (QString(words.join(" ")).length() > m) {
       for (int i = 0; i < words.count(); i++) {
-        if (strPart.count() < m) {
+        if (strPart.length() < m) {
           strPart.append(words.at(i) + " ");
           words.removeAt(i);
           --i;
@@ -203,7 +207,9 @@ QString utils::removeNodeColor(QString input) {
          << "\x1b[47m"
          << "\x1b[39m"
          << "\x1b[22m ";
-  foreach (QString str, colors) { output = input.replace(str, " "); }
+  foreach (QString str, colors) {
+    output = input.replace(str, " ");
+  }
   return output;
 }
 
@@ -286,47 +292,54 @@ QString utils::cleanString(QString input) {
   QStringList sp_chars = {"\\", ",", "?", "!", "`", "_", "#",
                           "$",  "%", "^", "&", "*", ";", ":",
                           "/",  ">", "<", "~", "=", "+", "⭐"};
-  foreach (QString sp_char, sp_chars) { input.replace(sp_char, " "); }
+  foreach (QString sp_char, sp_chars) {
+    input.replace(sp_char, " ");
+  }
   return input;
 }
 
 QString utils::randomIpV6() {
   QDateTime cd = QDateTime::currentDateTime();
-  const QString possibleCharacters("abcdef0123456789" +
-                                   QString::number(cd.currentMSecsSinceEpoch())
-                                       .remove(QRegExp("[^a-zA-Z\\d\\s]")));
+
+  static const auto reg = QRegularExpression("[^a-zA-Z\\d\\s]");
+  const QString possibleCharacters =
+      "abcdef0123456789" +
+      QString::number(cd.currentMSecsSinceEpoch()).remove(reg);
+
   const int randomStringLength = 28;
   QString randomString;
-  qsrand(cd.toTime_t());
+  QRandomGenerator *generator = QRandomGenerator::global();
+
   for (int i = 0; i < randomStringLength; ++i) {
-    int index = qrand() % possibleCharacters.length();
+    int index = generator->bounded(possibleCharacters.length());
     QChar nextChar = possibleCharacters.at(index);
-    if (i == 4 || i == 8 || i == 12 || i == 16 || i == 20 || i == 24) {
+
+    if (i % 4 == 0 && i != 0) {
       randomString.append(":");
     }
     randomString.append(nextChar);
   }
+
   return randomString.trimmed().simplified().remove(" ");
 }
 
-void utils::desktopOpenUrl(const QString str){
-    QProcess *xdg_open = new QProcess(0);
-    xdg_open->start("xdg-open", QStringList() << str);
-    if (xdg_open->waitForStarted(1000) == false) {
-      // try using QdesktopServices
-      bool opened = QDesktopServices::openUrl(QUrl(str));
-      if (opened == false) {
-        qWarning() << "failed to open url" << str;
-      }
+void utils::desktopOpenUrl(const QString str) {
+  QProcess *xdg_open = new QProcess(0);
+  xdg_open->start("xdg-open", QStringList() << str);
+  if (xdg_open->waitForStarted(1000) == false) {
+    // try using QdesktopServices
+    bool opened = QDesktopServices::openUrl(QUrl(str));
+    if (opened == false) {
+      qWarning() << "failed to open url" << str;
     }
-    connect(
-        xdg_open,
-        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-            &QProcess::finished),
-        [xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
-          Q_UNUSED(exitCode);
-          Q_UNUSED(exitStatus);
-          xdg_open->close();
-          xdg_open->deleteLater();
-        });
+  }
+  connect(xdg_open,
+          static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+              &QProcess::finished),
+          [xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
+            Q_UNUSED(exitCode);
+            Q_UNUSED(exitStatus);
+            xdg_open->close();
+            xdg_open->deleteLater();
+          });
 }
