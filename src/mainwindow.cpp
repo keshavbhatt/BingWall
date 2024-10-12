@@ -803,7 +803,7 @@ void MainWindow::setWallpaperOfTheDay() {
 // run app at startup
 void MainWindow::run_onstartup(bool enabled) {
 
-  QString launcher = QApplication::applicationFilePath().split("/").last();
+  QString launcher = QApplication::applicationFilePath();
   QString launcher_name = QApplication::applicationName();
   QString data = "[Desktop Entry]\n"
                  "Type=Application\n"
