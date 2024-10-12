@@ -329,6 +329,13 @@ void MainWindow::hide_option_for_downloaded(QObject *obj) {
 
   QString widgetName = "option_" + widget->objectName();
 
+  for (QObject *child : widget->children()) {
+    if (!child) {
+      qDebug() << "Found a null child!";
+      return;
+    }
+  }
+
   QPointer<QWidget> option_widget = widget->findChild<QWidget *>(widgetName);
   if (option_widget) {
     option_widget->hide();
@@ -548,18 +555,20 @@ void MainWindow::parse_json_reply(const QString reply) {
   }
   QList<QStringList> data;
   QJsonArray jsonArray = jsonResponse.array();
-  foreach (const QJsonValue &val, jsonArray) {
+
+  for (const QJsonValue &val : jsonArray) {
     QJsonObject object = val.toObject();
-    QString title, copyright, fullUrl, thumbUrl, date;
-    title = object.value("title").toString();
-    copyright = object.value("copyright").toString();
-    fullUrl = object.value("fullUrl").toString();
-    thumbUrl = object.value("thumbUrl").toString();
-    date = object.value("date").toString();
+
+    QString title = object.value("title").toString();
+    QString copyright = object.value("copyright").toString();
+    QString fullUrl = object.value("fullUrl").toString();
+    QString thumbUrl = object.value("thumbUrl").toString();
+    QString date = object.value("date").toString();
 
     QStringList item = {title, copyright, fullUrl, thumbUrl, date};
-    if (data.contains(item) == false)
+    if (!data.contains(item)) {
       data.append(item);
+    }
   }
   // load data into view
   load_data_into_view(data);
