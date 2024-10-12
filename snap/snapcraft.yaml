@@ -1,24 +1,26 @@
 name: bing-wall
-version: '2.4'
+version: '3.0'
 summary: Bing Wallpaper of the day to Gnome Desktop
 description: |
   Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
-  
+icon: snap/gui/icon.png
+
 grade: stable
 confinement: strict
-icon: snap/gui/icon.png
 base: core22
 compression : lzo
 
 architectures:
-  - build-on: amd64
+  - build-on: [amd64]
+    build-for: [amd64]
     
 environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/qt5-core22
+  SNAP_DESKTOP_RUNTIME: $SNAP/qt-framework-6-6-core22
   
 apps:
   bing-wall:
-    command: bin/desktop-launch $SNAP/usr/bin/bing-wall
+    command-chain: [bin/desktop-launch]
+    command: $SNAP/usr/bin/bing-wall
     autostart: BingWall.desktop
     environment:
        IS_SNAP: 1
@@ -35,6 +37,11 @@ apps:
         - network
         - wayland
 
+passthrough:
+  hooks:
+    configure:
+      command-chain: [bin/desktop-launch]
+
 plugs:
   gsettings:
   gtk-3-themes:
@@ -49,35 +56,32 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
-  qt5-core22:
+  qt-framework-6-6-core22:
     interface: content
-    target: $SNAP/qt5-core22
-    default-provider: qt5-core22
+    target: $SNAP/qt-framework-6-6-core22
+    default-provider: qt-framework-6-6-core22
 
 parts:
-   desktop-qt5-build:
+   build-src:
+     source: .
+     source-subdir: src/
      plugin: nil
      build-packages:
-       - build-essential
-       - qtbase5-dev
-       - dpkg-dev
-     
-   build-src:
-     source: https://github.com/keshavbhatt/BingWall.git
-     source-subdir: src/
-     plugin: qmake
-     after: [desktop-qt5-build]
+        - build-essential
+        - qt6-base-dev
      override-build: |
-            snapcraftctl build
-            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${SNAPCRAFT_PART_SRC}/src/bingwall.desktop
-            mkdir -p ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/
-            cp -rf ${SNAPCRAFT_PART_SRC}/src/bingwall.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
+            craftctl default
+            qmake6 PREFIX=${CRAFT_PART_INSTALL}/usr src
+            make -j4
+            make install
 
-   desktop-launch:
-     plugin: nil
-     source: https://github.com/keshavbhatt/qt5-core22.git
-     after: [build-src]
-     override-build: |
-            snapcraftctl build
-            mkdir -p ${SNAPCRAFT_PART_INSTALL}/bin/
-            cp -rf ${SNAPCRAFT_PART_SRC}/snap_launcher/bin/desktop-launch ${SNAPCRAFT_PART_INSTALL}/bin/
+            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${CRAFT_PART_SRC}/src/bingwall.desktop
+            mkdir -p ${CRAFT_PART_INSTALL}/usr/share/applications/
+            cp -rf ${CRAFT_PART_SRC}/src/bingwall.desktop ${CRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
+   launchers:
+     plugin: dump
+     source: command-chain/
+     build-attributes: [no-patchelf]
+     organize:
+       '*': bin/
+   #todo get command-chain-from content snap source
