@@ -37,11 +37,6 @@ apps:
         - network
         - wayland
 
-passthrough:
-  hooks:
-    configure:
-      command-chain: [bin/desktop-launch]
-
 plugs:
   gsettings:
   gtk-3-themes:
