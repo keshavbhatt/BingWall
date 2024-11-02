@@ -47,7 +47,6 @@ apps:
         - wayland
 
 plugs:
-  gsettings:
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
