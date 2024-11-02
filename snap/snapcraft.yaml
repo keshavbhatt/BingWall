@@ -5,22 +5,31 @@ description: |
   Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
 icon: snap/gui/icon.png
 
+base: core24
 grade: stable
 confinement: strict
-base: core22
 compression : lzo
 
-architectures:
-  - build-on: [amd64]
+layout:
+  /etc/fonts:
+    bind: $SNAP/etc/fonts
+  /usr/share/fonts:
+    bind: $SNAP/usr/share/fonts
+  /var/cache/fontconfig:
+    bind: $SNAP_DATA/var/cache/fontconfig
+
+platforms:
+  amd64:
+    build-on: [amd64]
     build-for: [amd64]
     
 environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/qt-framework-6-6-core22
+  SNAP_DESKTOP_RUNTIME: $SNAP/qt6-core24
   
 apps:
   bing-wall:
     command-chain: [bin/desktop-launch]
-    command: $SNAP/usr/bin/bing-wall
+    command: usr/bin/bing-wall
     autostart: BingWall.desktop
     environment:
        IS_SNAP: 1
@@ -37,11 +46,6 @@ apps:
         - network
         - wayland
 
-passthrough:
-  hooks:
-    configure:
-      command-chain: [bin/desktop-launch]
-
 plugs:
   gsettings:
   gtk-3-themes:
@@ -56,10 +60,10 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
-  qt-framework-6-6-core22:
+  qt6-core24:
     interface: content
-    target: $SNAP/qt-framework-6-6-core22
-    default-provider: qt-framework-6-6-core22
+    target: $SNAP/qt6-core24
+    default-provider: qt6-core24
 
 parts:
    build-src:
