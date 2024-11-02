@@ -25,6 +25,8 @@ platforms:
     
 environment:
   SNAP_DESKTOP_RUNTIME: $SNAP/qt6-core24
+  QT_QPA_PLATFORM: xcb #wayland-egl window decoration is messed up atm
+  DISABLE_WAYLAND: 1
   
 apps:
   bing-wall:
@@ -44,6 +46,7 @@ apps:
         - unity7
         - x11
         - network
+        - network-status 
         - wayland
 
 plugs:
