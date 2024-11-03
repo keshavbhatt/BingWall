@@ -84,10 +84,12 @@ parts:
             sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${CRAFT_PART_SRC}/src/bingwall.desktop
             mkdir -p ${CRAFT_PART_INSTALL}/usr/share/applications/
             cp -rf ${CRAFT_PART_SRC}/src/bingwall.desktop ${CRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
-   launchers:
-     plugin: dump
-     source: command-chain/
-     build-attributes: [no-patchelf]
-     organize:
-       '*': bin/
-   #todo get command-chain-from content snap source
+
+   runtime-command-chain:
+     plugin: nil
+     source: https://github.com/keshavbhatt/qt6-core24.git
+     after: [build-src]
+     override-build: |
+            craftctl default
+            mkdir -p ${CRAFT_PART_INSTALL}/bin/
+            cp -rf ${CRAFT_PART_SRC}/command-chain/* ${CRAFT_PART_INSTALL}/bin/
