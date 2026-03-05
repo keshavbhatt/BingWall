@@ -1,0 +1,26 @@
+#!/bin/bash
+# Detect the session type and configure Qt's platform plugin accordingly.
+# This is needed because strict snap confinement remaps XDG_RUNTIME_DIR to a
+# snap-specific directory that does not contain the Wayland compositor socket.
+# On Wayland-only environments (e.g. GNOME 49+ / WSL2) the X11 fallback fails.
+
+if [ "${XDG_SESSION_TYPE}" = "wayland" ]; then
+    export QT_QPA_PLATFORM=wayland
+    unset DISPLAY
+
+    # Snaps remap XDG_RUNTIME_DIR to /run/user/<uid>/snap.<name>/ which does
+    # not contain the Wayland socket.  Build the host runtime path directly and
+    # set WAYLAND_DISPLAY to an absolute path so Qt uses it without consulting
+    # the remapped XDG_RUNTIME_DIR.
+    _runtime_host="/run/user/$(id -u)"
+    for _sock in wayland-1 wayland-0; do
+        if [ -S "${_runtime_host}/${_sock}" ]; then
+            export WAYLAND_DISPLAY="${_runtime_host}/${_sock}"
+            break
+        fi
+    done
+else
+    export QT_QPA_PLATFORM=xcb
+fi
+
+exec "$@"

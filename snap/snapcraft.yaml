@@ -25,12 +25,11 @@ platforms:
     
 environment:
   SNAP_DESKTOP_RUNTIME: $SNAP/qt6-core24
-  QT_QPA_PLATFORM: xcb #wayland-egl window decoration is messed up atm
-  DISABLE_WAYLAND: 1
+  # QT_QPA_PLATFORM is set dynamically by bin/wayland-detect based on XDG_SESSION_TYPE
   
 apps:
   bing-wall:
-    command-chain: [bin/desktop-launch]
+    command-chain: [bin/desktop-launch, bin/wayland-detect]
     command: usr/bin/bing-wall
     autostart: BingWall.desktop
     environment:
@@ -75,6 +74,8 @@ parts:
      build-packages:
         - build-essential
         - qt6-base-dev
+     stage-packages:
+        - libcanberra-gtk3-module
      override-build: |
             craftctl default
             qmake6 PREFIX=${CRAFT_PART_INSTALL}/usr src
@@ -84,6 +85,10 @@ parts:
             sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${CRAFT_PART_SRC}/src/bingwall.desktop
             mkdir -p ${CRAFT_PART_INSTALL}/usr/share/applications/
             cp -rf ${CRAFT_PART_SRC}/src/bingwall.desktop ${CRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
+
+            mkdir -p ${CRAFT_PART_INSTALL}/bin/
+            cp -rf ${CRAFT_PART_SRC}/snap/local/wayland-detect ${CRAFT_PART_INSTALL}/bin/wayland-detect
+            chmod +x ${CRAFT_PART_INSTALL}/bin/wayland-detect
 
    runtime-command-chain:
      plugin: nil
