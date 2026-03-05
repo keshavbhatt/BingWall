@@ -36,6 +36,8 @@ signals:
     void wallpaperSet();
     void wallpaperListLoaded(bool containsWallpapers);
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
 protected slots:
     bool eventFilter(QObject *obj, QEvent *event);
 private slots:
