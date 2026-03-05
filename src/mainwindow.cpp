@@ -22,6 +22,10 @@ MainWindow::MainWindow(QWidget *parent)
   setWindowTitle(QApplication::applicationName());
   setWindowIcon(QIcon(":/resources/binfwall_128.png"));
 
+  if (settings.contains("windowGeometry")) {
+    restoreGeometry(settings.value("windowGeometry").toByteArray());
+  }
+
   networkManager_ = new QNetworkAccessManager(this);
   QString cache_path =
       QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
@@ -660,6 +664,11 @@ void MainWindow::load_data_into_view(QList<QStringList> data) {
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  settings.setValue("windowGeometry", saveGeometry());
+  QMainWindow::closeEvent(event);
+}
 
 void MainWindow::on_wallpaperList_itemClicked(QListWidgetItem *item) {
   QWidget *listwidget = ui->wallpaperList->itemWidget(item);
