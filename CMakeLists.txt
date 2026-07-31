@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(bingwall
-    VERSION 3.0
+    VERSION 3.1
     DESCRIPTION "Bing Wallpaper of the day for your desktop"
     HOMEPAGE_URL "https://github.com/keshavbhatt/BingWall"
     LANGUAGES CXX

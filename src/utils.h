@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QProcessEnvironment>
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QDir>
@@ -84,6 +85,7 @@ public slots:
     static QString cleanString(QString input);
     static QString genRand(int length);
     static void desktopOpenUrl(const QString str);
+    static QProcessEnvironment childProcessEnvironment();
 private slots:
     //use refreshCacheSize
     static quint64 dir_size(const QString &directory);

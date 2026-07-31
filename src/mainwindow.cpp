@@ -166,15 +166,15 @@ MainWindow::MainWindow(QWidget *parent)
       settings.value("location", "9").toInt());
 
   connect(_ui_settings.rate, &QPushButton::clicked,
-          [=]() { QDesktopServices::openUrl(QUrl("snap://bing-wall")); });
+          [=]() { utils::desktopOpenUrl("snap://bing-wall"); });
   connect(_ui_settings.github, &QPushButton::clicked, [=]() {
-    QDesktopServices::openUrl(QUrl("https://github.com/keshavbhatt/BingWall"));
+    utils::desktopOpenUrl("https://github.com/keshavbhatt/BingWall");
   });
   connect(_ui_settings.donate, &QPushButton::clicked, [=]() {
-    QDesktopServices::openUrl(QUrl("https://paypal.me/keshavnrj/4"));
+    utils::desktopOpenUrl("https://paypal.me/keshavnrj/4");
   });
   connect(_ui_settings.moreApps, &QPushButton::clicked, [=]() {
-    QDesktopServices::openUrl(QUrl("https://snapcraft.io/search?q=keshavnrj"));
+    utils::desktopOpenUrl("https://ktechpit.com/USS/public/products.php");
   });
   connect(_ui_settings.downloads, &QPushButton::clicked,
           [=]() { utils::desktopOpenUrl(returnPath("downloaded")); });
@@ -772,7 +772,7 @@ void MainWindow::load_downloaded_wallpapers() {
 }
 
 void MainWindow::on_wonderwall_clicked() {
-  QDesktopServices::openUrl(QUrl("https://snapcraft.io/wonderwall"));
+  utils::desktopOpenUrl("https://snapcraft.io/wonderwall");
 }
 
 void MainWindow::setWallpaperOfTheDay() {

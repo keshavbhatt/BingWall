@@ -1,4 +1,5 @@
 #include "wallpapersetter.h"
+#include "utils.h"
 
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -136,6 +137,7 @@ bool WallpaperSetter::setViaPortal(const QString &localPath,
 
 bool WallpaperSetter::setViaGsettings(const QString &localPath) {
   QProcess gsettings;
+  gsettings.setProcessEnvironment(utils::childProcessEnvironment());
   gsettings.start(QStringLiteral("gsettings"),
                   {QStringLiteral("get"),
                    QStringLiteral("org.gnome.desktop.interface"),

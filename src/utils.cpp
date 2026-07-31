@@ -323,8 +323,23 @@ QString utils::randomIpV6() {
   return randomString.trimmed().simplified().remove(" ");
 }
 
+// Environment for child processes (xdg-open, gsettings, ...). Outside a
+// snap, drop the library overrides a dev run exports for the app itself —
+// host tools crash when forced onto the snap runtime's libraries (e.g.
+// /bin/sh against core24's libreadline). Inside a snap, children must keep
+// the snap environment untouched.
+QProcessEnvironment utils::childProcessEnvironment() {
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+  if (!env.contains("SNAP")) {
+    env.remove("LD_LIBRARY_PATH");
+    env.remove("QT_PLUGIN_PATH");
+  }
+  return env;
+}
+
 void utils::desktopOpenUrl(const QString str) {
   QProcess *xdg_open = new QProcess(0);
+  xdg_open->setProcessEnvironment(childProcessEnvironment());
   xdg_open->start("xdg-open", QStringList() << str);
   if (xdg_open->waitForStarted(1000) == false) {
     // try using QdesktopServices
