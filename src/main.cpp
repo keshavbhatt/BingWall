@@ -5,7 +5,8 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  QApplication::setApplicationName("BingWall");
+  QApplication::setApplicationName(APPNAMESTR);
+  QApplication::setApplicationVersion(VERSIONSTR);
   QApplication::setOrganizationName("org.keshavnrj.ubuntu");
   a.setStyle(new DarkStyle);
   MainWindow w;

@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     restoreGeometry(settings.value("windowGeometry").toByteArray());
   }
 
+  _wallpaperSetter = new WallpaperSetter(this);
+
   networkManager_ = new QNetworkAccessManager(this);
   QString cache_path =
       QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
@@ -514,35 +516,9 @@ void MainWindow::apply_wallpaper(QString filePath) {
       filePath = filePath + ".png";
   }
 
-  QProcess *gsettings = new QProcess(this);
-  gsettings->closeReadChannel(QProcess::StandardOutput);
-  gsettings->closeReadChannel(QProcess::StandardError);
-  gsettings->closeWriteChannel();
-
-  gsettings->start("gsettings", QStringList() << "get"
-                                              << "org.gnome.desktop.interface"
-                                              << "color-scheme");
-  gsettings->waitForFinished();
-  QString colorScheme(gsettings->readAllStandardOutput().trimmed());
-  QString picture_uri;
-
-  if (colorScheme == "'prefer-dark'") {
-    picture_uri = "picture-uri-dark";
-  } else {
-    picture_uri = "picture-uri";
-  }
-
-  gsettings->start("gsettings", QStringList()
-                                    << "set"
-                                    << "org.gnome.desktop.background"
-                                    << picture_uri << "file://" + filePath);
-  if (!gsettings->waitForFinished()) {
-    qDebug() << "GSETTINGS:Process failed:" << gsettings->errorString();
-  } else {
-    qDebug() << "GSETTINGS:Process success:";
+  if (_wallpaperSetter->setWallpaper(filePath)) {
     emit wallpaperSet();
   }
-  gsettings->deleteLater();
 }
 
 void MainWindow::load_wallpapers() {
@@ -800,20 +776,20 @@ void MainWindow::on_wonderwall_clicked() {
 }
 
 void MainWindow::setWallpaperOfTheDay() {
+  // Headless (--set) mode: the window was never shown, so close() alone
+  // cannot end the application (quitOnLastWindowClosed never fires for a
+  // hidden window) — quit explicitly once the job is done.
   connect(this, &MainWindow::wallpaperSet, [=]() {
-    if (this->close() == false) {
-      qApp->quit();
-    }
+    this->close();
+    qApp->quit();
   });
   connect(this, &MainWindow::wallpaperListLoaded, [=](bool containsWallpapers) {
     if (containsWallpapers) {
       ui->wallpaperList->setCurrentRow(0);
       _ui_action.set->click();
     } else {
-      // TODO retry 10 time
-      if (this->close() == false) {
-        qApp->quit();
-      }
+      this->close();
+      qApp->quit();
     }
   });
 }

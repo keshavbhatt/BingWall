@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+GenericName=@APP_NAME@
+Name=@APP_NAME@
+Type=Application
+Icon=bingwall
+Keywords=bing;wallpaper;of day
+Exec=@APP_EXECUTABLE_NAME@ %F
+Categories=Utility;Qt;
+Terminal=false

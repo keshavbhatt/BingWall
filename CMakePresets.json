@@ -1,0 +1,74 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "description": "Debug build with full symbols",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Optimised release build",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "release-with-debug-info",
+      "displayName": "RelWithDebInfo",
+      "description": "Release with debug info",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "build-debug",
+      "displayName": "Build Debug",
+      "configurePreset": "debug",
+      "jobs": 0
+    },
+    {
+      "name": "build-release",
+      "displayName": "Build Release",
+      "configurePreset": "release",
+      "jobs": 0
+    },
+    {
+      "name": "clean-build-debug",
+      "displayName": "Clean Build Debug",
+      "description": "Wipe the debug build directory then rebuild from scratch",
+      "configurePreset": "debug",
+      "cleanFirst": true,
+      "jobs": 0
+    },
+    {
+      "name": "clean-build-release",
+      "displayName": "Clean Build Release",
+      "description": "Wipe the release build directory then rebuild from scratch",
+      "configurePreset": "release",
+      "cleanFirst": true,
+      "jobs": 0
+    }
+  ]
+}

@@ -10,6 +10,7 @@
 #include "request.h"
 #include "waitingspinnerwidget.h"
 #include "utils.h"
+#include "wallpapersetter.h"
 
 #include "ui_listitem_ui.h"
 #include "ui_action_ui.h"
@@ -82,6 +83,7 @@ private:
     Ui::downloaded_widget _ui_downloaded;
     Ui::downloaded_option_ui _ui_downloaded_option;
     Request * _request = nullptr;
+    WallpaperSetter *_wallpaperSetter = nullptr;
     QLabel *_wall_view = nullptr;
     WaitingSpinnerWidget *_loader = nullptr;
     QTimer *_loader_timer = nullptr;

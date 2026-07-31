@@ -1,95 +1,44 @@
 name: bing-wall
+base: core24
 version: '3.0'
 summary: Bing Wallpaper of the day to Gnome Desktop
 description: |
-  Little powerful utility brings Bing Wallpaper of the day to your desktop with ease of few clicks, Allows download wallpaper with clicks and save them to accessible directory.
-icon: snap/gui/icon.png
+  Little powerful utility brings Bing Wallpaper of the day to your desktop
+  with ease of few clicks, Allows download wallpaper with clicks and save
+  them to accessible directory.
 
-base: core24
 grade: stable
 confinement: strict
-compression : lzo
-
-layout:
-  /etc/fonts:
-    bind: $SNAP/etc/fonts
-  /usr/share/fonts:
-    bind: $SNAP/usr/share/fonts
-  /var/cache/fontconfig:
-    bind: $SNAP_DATA/var/cache/fontconfig
+icon: snap/gui/icon.png
+compression: lzo
 
 platforms:
   amd64:
-    build-on: [amd64]
-    build-for: [amd64]
-    
-environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/qt6-core24
-  QT_QPA_PLATFORM: xcb #wayland-egl window decoration is messed up atm
-  DISABLE_WAYLAND: 1
-  
+  arm64:
+
 apps:
   bing-wall:
-    command-chain: [bin/desktop-launch]
     command: usr/bin/bing-wall
-    autostart: BingWall.desktop
-    environment:
-       IS_SNAP: 1
-       NO_AT_BRIDGE: 1
+    extensions: [kde-neon-6]
     desktop: usr/share/applications/bingwall.desktop
+    autostart: BingWall.desktop
     plugs:
-        - desktop
-        - desktop-legacy
-        - gsettings
-        - home
-        - opengl
-        - unity7
-        - x11
-        - network
-        - network-status 
-        - wayland
-
-plugs:
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes
-  qt6-core24:
-    interface: content
-    target: $SNAP/qt6-core24
-    default-provider: qt6-core24
+      - gsettings
+      - home
+      - network
+      - network-status
+      - opengl
+      - unity7
+      - wayland
+      - x11
 
 parts:
-   build-src:
-     source: .
-     source-subdir: src/
-     plugin: nil
-     build-packages:
-        - build-essential
-        - qt6-base-dev
-     override-build: |
-            craftctl default
-            qmake6 PREFIX=${CRAFT_PART_INSTALL}/usr src
-            make -j4
-            make install
-
-            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${CRAFT_PART_SRC}/src/bingwall.desktop
-            mkdir -p ${CRAFT_PART_INSTALL}/usr/share/applications/
-            cp -rf ${CRAFT_PART_SRC}/src/bingwall.desktop ${CRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
-
-   runtime-command-chain:
-     plugin: nil
-     source: https://github.com/keshavbhatt/qt6-core24.git
-     after: [build-src]
-     override-build: |
-            craftctl default
-            mkdir -p ${CRAFT_PART_INSTALL}/bin/
-            cp -rf ${CRAFT_PART_SRC}/command-chain/* ${CRAFT_PART_INSTALL}/bin/
+  application:
+    plugin: cmake
+    source: .
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DCMAKE_BUILD_TYPE=Release
+    override-build: |
+      craftctl default
+      sed -i 's|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/512x512/apps/bingwall.png|' ${CRAFT_PART_INSTALL}/usr/share/applications/bingwall.desktop
